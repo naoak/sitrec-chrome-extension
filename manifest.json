@@ -1,22 +1,21 @@
 {
-  "name": "Screencast",
+  "name": "Screencast (customized for local server)",
   "version": "0.3",
+  "manifest_version": 2,
   "description": "Records a video of your chrome browser. Lets you share out the video or stills of the video.",
   "icons": {
     "128": "images/icon.png",
     "48": "images/icon.png",
     "16": "images/icon.png"
   },
-  "background_page": "background.html",
+  "background": {
+    "scripts": [
+      "screenshot.js"
+    ]
+  },
   "browser_action": {
      "default_title": "Start recording.",
      "default_icon": "images/icon.png"
    },
-  "content_scripts": [
-    {
-      "matches": ["http://www.google.com/robots.txt*"],
-      "js": ["oauth2/oauth2_inject.js"]
-    }
-  ],
   "permissions": ["tabs", "<all_urls>"]
 }

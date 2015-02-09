@@ -4,27 +4,35 @@ var QUALITY = 50;
 var isRecording = false;
 var timer = null;
 var images = [];
+var startDate;
 
 function startRecording() {
-  // Update icon to show that it's recording
+  var i = 0;
   chrome.browserAction.setIcon({path: 'images/icon-rec.png'});
   chrome.browserAction.setTitle({title: 'Stop recording.'});
   images = [];
-  // Set up a timer to regularly get screengrabs
+  startDate = Date.now();
+  takePhoto(i, images);
   timer = setInterval(function() {
-    chrome.tabs.captureVisibleTab(null, {quality: QUALITY}, function(img) {
-      images.push(img);
-    });
+    takePhoto(++i, images);
   }, 1000 / FPS);
 }
 
+function takePhoto(i, images) {
+  chrome.browserAction.setBadgeText({text: '' + i});
+  chrome.tabs.captureVisibleTab(null, {quality: QUALITY}, function(img) {
+    images.push({
+      index: i,
+      time: Date.now() - startDate,
+      data: img
+    });
+  });
+}
+
 function stopRecording() {
-  // Update icon to show regular icon
   chrome.browserAction.setIcon({path: 'images/icon.png'});
   chrome.browserAction.setTitle({title: 'Start recording.'});
-  // Stop the timer
   clearInterval(timer);
-  // Playback the recorded video
   showVideoPlaybackPage();
 }
 

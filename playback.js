@@ -1,33 +1,35 @@
 function $(id) { return document.querySelector(id); }
 
 var background = chrome.extension.getBackgroundPage();
-// Images from the screen capture
 var images = background.images;
+var startDate = background.startDate;
 var currentIndex = 0;
-// Where to render the image
-var $image = $('#image');
-// Playback timer
+var $image;
+var $slider;
+var $playpause;
+var $still;
+var $frameIndex;
 var timer = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Setup listeners for rew, pp, ff and slider
-  $('#slider').addEventListener('change', function(event) {
+  $image = $('#image');
+  $slider = $('#slider');
+  $playpause = $('#playpause');
+  $still = $('#still');
+  $frameIndex = $('#frameIndex');
+
+  $slider.addEventListener('change', function(event) {
     var ratio = $('#slider').value / 100;
     setIndex(parseInt((images.length - 1) * ratio, 10));
     pause();
   });
 
-  $('#playpause').addEventListener('click', function(event) {
+  $playpause.addEventListener('click', function(event) {
     playpause();
   });
 
-  $('#still').addEventListener('click', function(event) {
-    shareStill();
-  });
-
-  $('#video').addEventListener('click', function(event) {
-    alert('Sorry, video sharing is not implemented yet');
-    //shareVideo();
+  $still.addEventListener('click', function(event) {
+    uploadAll();
   });
 
   document.addEventListener('keydown', function(event) {
@@ -36,14 +38,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Set the first frame
   setIndex(currentIndex);
-  // Set the state to playback
   setState('playback');
 });
 
-function updateSliderPosition() {
-  setState('playback');
+function updateSliderPosition(options) {
+  if (!options || !options.ignoreState) {
+    setState('playback');
+  }
   var percent = parseInt(currentIndex * 100 / (images.length - 1), 10);
   $('#slider').value = percent;
 }
@@ -57,13 +59,14 @@ function playpause() {
 }
 
 function play() {
-  // Update icon
-  $('#playpause').className = 'pause';
+  $playpause.className = 'pause';
+
   // If already at the end, restart
   if (currentIndex == images.length - 1) {
     setIndex(0);
     updateSliderPosition();
   }
+
   // Load images and render them in sequence
   timer = setInterval(function() {
     if (currentIndex >= images.length - 1) {
@@ -76,7 +79,7 @@ function play() {
 }
 
 function pause() {
-  $('#playpause').className = 'play';
+  $playpause.className = 'play';
   clearInterval(timer);
   timer = null;
 }
@@ -88,51 +91,42 @@ function setIndex(index) {
   }
   currentIndex = index;
   // TODO: validate index
-  $image.src = images[index];
+  $image.src = images[index].data;
+  $frameIndex.textContent = '' + index;
 }
 
-function shareVideo() {
+function uploadAll() {
   setState('upload');
   setProgress(0);
-  var converter = new ImagesToVideo(background.FPS);
-  // First, upload all of the images to the server
-  (function addImage(index) {
-    if (index < images.length) {
-      // While there are images left, add them to the converter
-      var image = images[index];
-      converter.addImage(index, image, function() {
-        addImage(index + 1);
-        setProgress(100 * index / images.length);
-      });
-    } else {
-      setProgress(95);
-      // Once all are gone, call the server
-      converter.getVideo(function(data) {
-        setSharedInfo(data.url, 'Screen capture uploaded!', '#');
-        setState('shared');
-      });
-    }
-  })(0);
-}
-
-function shareStill() {
-  setState('upload');
-  setProgress(0);
-  // Get the current image
-  var dataUri = images[currentIndex];
-  setProgress(10);
-  // Upload it
-  getOrCreateAlbum('screenshot', function(albumId) {
-    uploadPhoto(albumId, dataUri, function(data) {
-      setProgress(100);
-      console.log('upload success', data);
-      setSharedInfo(data.url, 'Still image uploaded!');
-      setState('shared');
-    }, function(loaded, total) {
-      var percent = 10 + loaded / total * 80;
-      setProgress(percent);
-    });
+  getOrCreateAlbum(startDate, function(album) {
+    uploadNext(album, 0);
   });
+}
+
+function uploadNext(album, i) {
+  var image;
+  var photoName;
+  var dataUri;
+
+  if (i < images.length) {
+    setIndex(i);
+    updateSliderPosition({ignoreState: true});
+
+    image = images[i];
+    photoName = image.time;
+    dataUri = image.data;
+
+    uploadPhoto(album.name, photoName, dataUri, function(data) {
+      setProgress(((i + 1) / images.length) * 100);
+      uploadNext(album, i + 1);
+    }, function(loaded, total) {
+      setProgress(((i + loaded / total) / images.length) * 100);
+    });
+  }
+  else {
+    setSharedInfo(album.name, 'All images have been uploaded.');
+    setState('shared');
+  }
 }
 
 /**
@@ -158,16 +152,18 @@ function setProgress(percent) {
  * @param {Object} editUrl (optional) URL to edit the uploaded asset
  */
 function setSharedInfo(url, message, editUrl) {
-  // Set link
   var link = $('#bottom .shared .link');
   link.innerText = url;
+
   // If message specified, set it
   if (message) {
     $('#bottom .shared .message').innerText = message;
   }
+
   // If editUrl specified, make sure user can click it
   if (editUrl) {
   }
+
   // Lastly, select the URL
   setTimeout(function() { selectElementContents(link); }, 200);
 }
