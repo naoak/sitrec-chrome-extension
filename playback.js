@@ -18,9 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
   $still = $('#still');
   $frameIndex = $('#frameIndex');
 
+  $slider.setAttribute('min', 0);
+  $slider.setAttribute('max', images.length - 1);
+  $slider.setAttribute('step', 1);
+
   $slider.addEventListener('change', function(event) {
-    var ratio = $('#slider').value / 100;
-    setIndex(parseInt((images.length - 1) * ratio, 10));
+    setIndex($slider.value);
     pause();
   });
 
@@ -46,8 +49,7 @@ function updateSliderPosition(options) {
   if (!options || !options.ignoreState) {
     setState('playback');
   }
-  var percent = parseInt(currentIndex * 100 / (images.length - 1), 10);
-  $('#slider').value = percent;
+  $slider.value = currentIndex;
 }
 
 function playpause() {
