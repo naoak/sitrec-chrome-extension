@@ -3,12 +3,18 @@ body {
 }
 
 input[type=url] {
-  width: 280px;
+  width: 300px;
   margin-bottom: 10px;
 }
 
 input[type=number] {
   width: 40px;
+  margin-bottom: 10px;
+}
+
+input[type=text] {
+  width: 120px;
+  margin-bottom: 10px;
 }
 
 input[type=button] {
