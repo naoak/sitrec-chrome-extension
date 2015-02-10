@@ -1,36 +1,36 @@
 document.addEventListener('DOMContentLoaded', function() {
-  var resolveUrl = document.getElementById('resolveUrl');
-  var url = document.getElementById('url');
-  var fps = document.getElementById('fps');
+  var inputNames = ['resolveUrl', 'url', 'album', 'fps'];
+  var inputs = inputNames.reduce(function(memo, key) {
+    memo[key] = document.getElementById(key);
+    return memo;
+  }, {});
   var recordBtn = document.getElementById('toggleRecord');
 
-  chrome.storage.sync.get(['resolveUrl', 'url', 'fps'], function(items) {
-    resolveUrl.value = items.resolveUrl || 'http://www.example.com/empty';
-    url.value = items.url || 'http://www.example.com/';
-    fps.value = items.fps || 10;
+  chrome.storage.sync.get(inputNames, function(items) {
+    inputs.resolveUrl.value = items.resolveUrl || 'http://www.example.com/empty';
+    inputs.url.value = items.url || 'http://www.example.com/';
+    inputs.album.value = items.album || '';
+    inputs.fps.value = items.fps || 10;
   });
 
   recordBtn.addEventListener('click', function() {
     chrome.runtime.sendMessage({
       toggleRecord: {
-        resolveUrl: resolveUrl.value,
-        url: url.value,
-        fps: fps.value
+        resolveUrl: inputs.resolveUrl.value,
+        url: inputs.url.value,
+        album: inputs.album.value,
+        fps: inputs.fps.value
       }
     }, function(response) {
       recordBtn.value = response.isRecording ? 'stop' : 'rec';
     });
   });
 
-  resolveUrl.addEventListener('change', function() {
-    chrome.storage.sync.set({resolveUrl: resolveUrl.value});
-  });
-
-  url.addEventListener('change', function() {
-    chrome.storage.sync.set({url: url.value});
-  });
-
-  fps.addEventListener('change', function() {
-    chrome.storage.sync.set({url: url.value});
+  inputNames.forEach(function(key) {
+    inputs[key].addEventListener('change', function() {
+      var obj = {};
+      obj[key] = inputs[key].value;
+      chrome.storage.sync.set(obj);
+    });
   });
 });
