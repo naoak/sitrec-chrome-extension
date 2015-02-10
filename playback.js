@@ -3,6 +3,7 @@ function $(id) { return document.querySelector(id); }
 var background = chrome.extension.getBackgroundPage();
 var images = background.images;
 var startDate = background.startDate;
+var startDateFormatted = formatDate(new Date(startDate));
 var currentIndex = 0;
 var $image;
 var $slider;
@@ -44,6 +45,22 @@ document.addEventListener('DOMContentLoaded', function() {
   setIndex(currentIndex);
   setState('playback');
 });
+
+function formatDate(date) {
+  var yy = date.getFullYear();
+  var mm = date.getMonth() + 1;
+  var dd = date.getDate();
+  var hh = date.getHours();
+  var MM = date.getMinutes();
+
+  if (mm < 10) {
+    mm = '0' + mm;
+  }
+  if (dd < 10) {
+    dd = '0' + dd;
+  }
+  return yy + '-' + mm + dd + '-' + hh + MM;
+}
 
 function updateSliderPosition(options) {
   if (!options || !options.ignoreState) {
@@ -100,7 +117,7 @@ function setIndex(index) {
 function uploadAll() {
   setState('upload');
   setProgress(0);
-  getOrCreateAlbum(startDate, function(album) {
+  getOrCreateAlbum(startDateFormatted, function(album) {
     uploadNext(album, 0);
   });
 }
