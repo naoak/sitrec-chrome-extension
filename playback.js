@@ -1,6 +1,7 @@
 function $(id) { return document.querySelector(id); }
 
 var background = chrome.extension.getBackgroundPage();
+var IntervalTimer = background.IntervalTimer;
 var images = background.images;
 var startDate = background.startDate;
 var startDateFormatted = formatDate(new Date(startDate));
@@ -10,7 +11,7 @@ var $slider;
 var $playpause;
 var $still;
 var $frameIndex;
-var timer = null;
+var timer = new IntervalTimer(null, 1000 / background.fps);
 
 document.addEventListener('DOMContentLoaded', function() {
   $image = $('#image');
@@ -24,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
   $slider.setAttribute('step', 1);
 
   $slider.addEventListener('change', function(event) {
-    setIndex($slider.value);
+    setIndex(parseInt($slider.value, 10));
     pause();
   });
 
@@ -59,6 +60,12 @@ function formatDate(date) {
   if (dd < 10) {
     dd = '0' + dd;
   }
+  if (hh < 10) {
+    hh = '0' + hh;
+  }
+  if (MM < 10) {
+    MM = '0' + MM;
+  }
   return yy + '-' + mm + dd + '-' + hh + MM;
 }
 
@@ -70,7 +77,7 @@ function updateSliderPosition(options) {
 }
 
 function playpause() {
-  if (timer) {
+  if (timer.isActive()) {
     pause();
   } else {
     play();
@@ -87,20 +94,20 @@ function play() {
   }
 
   // Load images and render them in sequence
-  timer = setInterval(function() {
+  timer.setProcedure(function() {
     if (currentIndex >= images.length - 1) {
       pause();
       return;
     }
     setIndex(currentIndex + 1);
     updateSliderPosition();
-  }, 1000 / background.FPS);
+  });
+  timer.start();
 }
 
 function pause() {
   $playpause.className = 'play';
-  clearInterval(timer);
-  timer = null;
+  timer.stop();
 }
 
 function setIndex(index) {

@@ -1,0 +1,23 @@
+body {
+  width: 320px;
+}
+
+input[type=url] {
+  width: 280px;
+  margin-bottom: 10px;
+}
+
+input[type=number] {
+  width: 40px;
+}
+
+input[type=button] {
+  display: block;
+  width: 80px;
+  margin: 10px auto;
+}
+
+label {
+  display: block;
+  width: 100px;
+}

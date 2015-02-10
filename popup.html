@@ -1,0 +1,33 @@
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <link rel="stylesheet" href="popup.css" type="text/css"/>
+</head>
+<body>
+
+<p>
+To disable cache, launch the developer tool and check the <b>disable cache</b> on the network tab.
+</p>
+
+<p>
+Then, input a URL to capture and click the <b>rec</b> button.
+</p>
+
+<div>
+<form>
+  <label>Pre Resolve DNS</label>
+  <input type="url" name="resolveUrl" id="resolveUrl" placeholder="URL" value="http://tenki.mopita.com/empty" required><br/>
+
+  <label>URL</label>
+  <input type="url" name="url" id="url" placeholder="URL" value="http://tenki.mopita.com/sp/top/" required><br/>
+
+  <label>FPS</label>
+  <input type="number" name="fps" id="fps" placeholder="FPS" value="10" required>
+
+  <input type="button" name="btn" id="toggleRecord" value="rec">
+</form>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
