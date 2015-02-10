@@ -16,13 +16,16 @@ Then, input a URL to capture and click the <b>rec</b> button.
 <div>
 <form>
   <label>Pre Resolve DNS</label>
-  <input type="url" name="resolveUrl" id="resolveUrl" placeholder="URL" value="http://tenki.mopita.com/empty" required><br/>
+  <input type="url" name="resolveUrl" id="resolveUrl" placeholder="url" value="http://tenki.mopita.com/empty" required><br/>
 
   <label>URL</label>
-  <input type="url" name="url" id="url" placeholder="URL" value="http://tenki.mopita.com/sp/top/" required><br/>
+  <input type="url" name="url" id="url" placeholder="url" value="http://tenki.mopita.com/sp/top/" required><br/>
+
+  <label>Album Name</label>
+  <input type="text" name="album" id="album" placeholder="album name" value="" required><br/>
 
   <label>FPS</label>
-  <input type="number" name="fps" id="fps" placeholder="FPS" value="10" required>
+  <input type="number" name="fps" id="fps" placeholder="fps" value="10" required>
 
   <input type="button" name="btn" id="toggleRecord" value="rec">
 </form>
