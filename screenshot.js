@@ -21,6 +21,7 @@ function startRecording() {
 function takePhoto(i, images) {
   chrome.browserAction.setBadgeText({text: '' + i});
   chrome.tabs.captureVisibleTab(null, {quality: QUALITY}, function(img) {
+    img = img ? img : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     images.push({
       index: i,
       time: Date.now() - startDate,

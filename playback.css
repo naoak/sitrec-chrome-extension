@@ -9,12 +9,16 @@ body {
 }
 
 #container.sp {
-  width: 480px;
+  width: 375px;
 }
 
 #image {
   width: 100%;
   box-shadow: 10px 10px 5px #000;
+}
+
+.sp #image {
+  min-height: 667px;
 }
 
 #controls_container {
@@ -38,7 +42,7 @@ body {
 }
 
 .sp #controls {
-  width: 400px;
+  width: 340px;
 }
 
 #share {
@@ -58,7 +62,7 @@ input[type=range] {
 }
 
 .sp input[type=range] {
-  width: 400px;
+  width: 340px;
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -104,7 +108,7 @@ button:hover {
 }
 
 .sp #playpause {
-  margin-left: 175px
+  margin-left: 145px
 }
 
 #playpause.play { background-image: url(images/play.png); }
