@@ -3,6 +3,7 @@ function $(id) { return document.querySelector(id); }
 var background = chrome.extension.getBackgroundPage();
 var IntervalTimer = background.IntervalTimer;
 var images = background.images;
+var albumPrefix = background.album;
 var startDate = background.startDate;
 var startDateFormatted = formatDate(new Date(startDate));
 var currentIndex = 0;
@@ -124,7 +125,7 @@ function setIndex(index) {
 function uploadAll() {
   setState('upload');
   setProgress(0);
-  getOrCreateAlbum(startDateFormatted, function(album) {
+  getOrCreateAlbum(albumPrefix + '-' + startDateFormatted, function(album) {
     uploadNext(album, 0);
   });
 }
@@ -139,7 +140,7 @@ function uploadNext(album, i) {
     updateSliderPosition({ignoreState: true});
 
     image = images[i];
-    photoName = image.time;
+    photoName = '' + (image.index * (1000 / background.fps));
     dataUri = image.data;
 
     uploadPhoto(album.name, photoName, dataUri, function(data) {
