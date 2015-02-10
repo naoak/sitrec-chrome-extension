@@ -8,6 +8,10 @@ body {
   position: relative;
 }
 
+#container.sp {
+  width: 480px;
+}
+
 #image {
   width: 100%;
   box-shadow: 10px 10px 5px #000;
@@ -33,6 +37,10 @@ body {
   padding-bottom: 20px;
 }
 
+.sp #controls {
+  width: 400px;
+}
+
 #share {
   float: right;
 }
@@ -47,6 +55,10 @@ input[type=range] {
   width: 600px;
   margin: 0 auto;
   height: 10px;
+}
+
+.sp input[type=range] {
+  width: 400px;
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -89,6 +101,10 @@ button:hover {
   height: 64px;
   background-size: 48px;
   margin-left: 263px;
+}
+
+.sp #playpause {
+  margin-left: 175px
 }
 
 #playpause.play { background-image: url(images/play.png); }
