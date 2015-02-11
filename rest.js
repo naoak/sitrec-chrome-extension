@@ -3,6 +3,7 @@ var DOMAIN = 'localhost:8080'
 var CREATE_ALBUM_URL = PROTOCOL + '://' + DOMAIN + '/album/create';
 var LIST_ALBUM_URL = PROTOCOL + '://' + DOMAIN + '/album/list';
 var CREATE_PHOTO_URL = PROTOCOL + '://' + DOMAIN + '/photo/create/{{albumName}}/{{photoName}}';
+var CREATE_HAR_URL = PROTOCOL + '://' + DOMAIN + '/har/create/{{albumName}}';
 
 function getOrCreateAlbum(albumName, callback) {
   getAlbum(albumName, function(album) {
@@ -73,5 +74,21 @@ function uploadPhoto(albumName, photoName, dataURI, callback, progressCallback) 
   }
   xhr.send(JSON.stringify({
     dataURI: dataURI
+  }));
+}
+
+function uploadHar(albumName, harLog, callback) {
+  var url = CREATE_HAR_URL.replace('{{albumName}}', albumName);
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', url, true);
+  xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+  xhr.onload = function(e) {
+    if (this.status == 201) {
+      var data = JSON.parse(xhr.responseText);
+      callback({size: data.size});
+    }
+  };
+  xhr.send(JSON.stringify({
+    har: harLog
   }));
 }

@@ -92,4 +92,37 @@ app.post('/photo/create/:albumName/:photoName', function(req, res) {
   }
 });
 
+app.post('/har/create/:albumName', function(req, res) {
+  var albumName = req.params.albumName;
+  var harLog = req.body.har;
+  var harBuffer = JSON.stringify(harLog);
+  var albumDir;
+
+  if (albumName && harLog) {
+    albumDir = path.join(DATA_DIR, albumName);
+    mkdirp(albumDir, function(err) {
+      if (!err) {
+        var harPath = path.join(albumDir, 'page.har');
+        fs.writeFile(harPath, JSON.stringify(harLog), function(err) {
+          if (!err) {
+            console.log(albumDir + '/page.har: ' + harBuffer.length + ' bytes');
+            res.status(201).json({
+              size: harBuffer.length
+            });
+          }
+          else {
+            res.status(500).send('Failed to save har file');
+          }
+        });
+      }
+      else {
+        res.status(500).send('Failed to create dir ' + albumName);
+      }
+    });
+  }
+  else {
+    res.status(400).send('Bad Request');
+  }
+});
+
 app.listen(8080);

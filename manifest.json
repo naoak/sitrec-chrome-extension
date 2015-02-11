@@ -3,6 +3,7 @@
   "version": "0.3",
   "manifest_version": 2,
   "description": "Records a video of your chrome browser. Lets you share out the video or stills of the video.",
+  "devtools_page": "devtools.html",
   "icons": {
     "128": "images/icon.png",
     "48": "images/icon.png",
@@ -15,5 +16,6 @@
      "default_title": "Start recording.",
      "default_icon": "images/icon.png"
    },
-  "permissions": ["tabs", "webNavigation", "<all_urls>", "storage"]
+  "permissions": ["tabs", "webNavigation", "<all_urls>", "storage"],
+  "web_accessible_resources": ["*"]
 }

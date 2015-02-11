@@ -3,6 +3,7 @@ function $(id) { return document.querySelector(id); }
 var background = chrome.extension.getBackgroundPage();
 var IntervalTimer = background.IntervalTimer;
 var images = background.images;
+var harLog = background.harLog;
 var albumPrefix = background.album;
 var startDate = background.startDate;
 var startDateFormatted = formatDate(new Date(startDate));
@@ -151,8 +152,16 @@ function uploadNext(album, i) {
     });
   }
   else {
-    setSharedInfo(album.name, 'All images have been uploaded.');
-    setState('shared');
+    if (harLog) {
+      uploadHar(album.name, harLog, function() {
+        setSharedInfo(album.name, 'All images and HAR have been uploaded.');
+        setState('shared');
+      });
+    }
+    else {
+      setSharedInfo(album.name, 'All images have been uploaded.');
+      setState('shared');
+    }
   }
 }
 

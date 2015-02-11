@@ -3,13 +3,16 @@ var QUALITY = 50;
 var RESOLVE_DELAY = 500;
 var fps;
 var album;
+var enableHar;
 
+var harLog = null;
 var isRecording = false;
 var timer = null;
 var images = [];
 var startDate;
 var onResolveLoadListener = null;
 var onLoadListener = null;
+var connections = {};
 
 function IntervalTimer(proc, span) {
   this.proc = proc;
@@ -62,6 +65,7 @@ IntervalTimer.prototype.setProcedure = function(proc) {
 function startRecording(options) {
   var i = 0;
   fps = parseInt((options.fps || DEFAULT_FPS), 10);
+  enableHar = options.enableHar;
   album = options.album || '';
   chrome.browserAction.setIcon({path: 'images/icon-rec.png'});
   chrome.browserAction.setTitle({title: 'Stop recording.'});
@@ -126,7 +130,25 @@ function stopRecording() {
     }
     chrome.browserAction.setIcon({path: 'images/icon.png'});
     chrome.browserAction.setTitle({title: 'Start recording.'});
-    showVideoPlaybackPage();
+    if (enableHar) {
+      chrome.tabs.getSelected(null, function(tab) {
+        var port = connections[tab.id];
+        function harListener(message) {
+          if (message.responseHar) {
+            harLog = {
+              log: message.responseHar
+            };
+            port.onMessage.removeListener(harListener);
+            showVideoPlaybackPage();
+          }
+        }
+        port.onMessage.addListener(harListener);
+        port.postMessage({requestHar: true});
+      });
+    }
+    else {
+      showVideoPlaybackPage();
+    }
   }
   timer.stop();
   doStop();
@@ -157,5 +179,27 @@ chrome.browserAction.onClicked.addListener(function(tab) {
   }
   else {
     chrome.browserAction.setPopup({popup: 'popup.html'});
+  }
+});
+
+chrome.runtime.onConnect.addListener(function(port) {
+  if (port.name == 'screencast') {
+    var extensionListener = function(message, sender, sendResponse) {
+      if (message.name == 'init') {
+        connections[message.tabId] = port;
+        return;
+      }
+    }
+    port.onMessage.addListener(extensionListener);
+    port.onDisconnect.addListener(function(port) {
+      port.onMessage.removeListener(extensionListener);
+      var tabs = Object.keys(connections);
+      for (var i = 0, len = tabs.length; i < len; i++) {
+        if (connections[tabs[i]] == port) {
+          delete connections[tabs[i]]
+          break;
+        }
+      }
+    });
   }
 });

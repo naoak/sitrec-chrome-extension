@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
         resolveUrl: inputs.resolveUrl.value,
         url: inputs.url.value,
         album: inputs.album.value,
-        fps: inputs.fps.value
+        fps: inputs.fps.value,
+        enableHar: true
       }
     }, function(response) {
       recordBtn.value = response.isRecording ? 'stop' : 'rec';
