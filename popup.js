@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
   var inputInfos = [
+    {name: 'album', default: ''},
     {name: 'resolveUrl', default: 'http://www.example.com/empty'},
     {name: 'url', default: 'http://www.example.com/'},
-    {name: 'album', default: ''},
     {name: 'losstime', default: 0},
     {name: 'fps', default: 10}
   ];
