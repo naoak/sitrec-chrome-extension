@@ -12,6 +12,10 @@ input[type=number] {
   margin-bottom: 10px;
 }
 
+#losstime {
+  width: 60px;
+}
+
 input[type=text] {
   width: 120px;
   margin-bottom: 10px;

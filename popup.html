@@ -6,11 +6,10 @@
 <body>
 
 <p>
-To disable cache, launch the developer tool and check the <b>disable cache</b> on the network tab.
-</p>
+Launch the devloper tool and check the <b>disable cache</b> on the network tab as needed.
 
 <p>
-Then, input a URL to capture and click the <b>rec</b> button.
+Then, input the fields below and click the <b>rec</b> button to capture.
 </p>
 
 <div>
@@ -24,8 +23,11 @@ Then, input a URL to capture and click the <b>rec</b> button.
   <label>Album Name</label>
   <input type="text" name="album" id="album" placeholder="album name" value="" required><br/>
 
+  <label>Loss Time</label>
+  <input type="number" name="losstime" id="losstime" placeholder="ms" value="0" required> ms
+
   <label>FPS</label>
-  <input type="number" name="fps" id="fps" placeholder="fps" value="10" required>
+  <input type="number" name="fps" id="fps" placeholder="fps" value="10" required> f/s
 
   <input type="button" name="btn" id="toggleRecord" value="rec">
 </form>

@@ -1,7 +1,9 @@
 var DEFAULT_FPS = 10;
+var DEFAULT_LOSSTIME = 0;
 var QUALITY = 50;
 var RESOLVE_DELAY = 500;
 var fps;
+var losstime;
 var album;
 var enableHar;
 
@@ -65,6 +67,7 @@ IntervalTimer.prototype.setProcedure = function(proc) {
 function startRecording(options) {
   var i = 0;
   fps = parseInt((options.fps || DEFAULT_FPS), 10);
+  losstime = parseInt((options.losstime || DEFAULT_LOSSTIME), 10);
   enableHar = options.enableHar;
   album = options.album || '';
   chrome.browserAction.setIcon({path: 'images/icon-rec.png'});
@@ -74,7 +77,9 @@ function startRecording(options) {
   function load() {
     onLoadListener = function(details) {
       if (details.url.split('#')[0].indexOf(options.url.split('#')[0]) == 0) {
-        stopRecording();
+        setTimeout(function() {
+          stopRecording();
+        }, losstime);
       }
     };
     chrome.webNavigation.onCompleted.addListener(onLoadListener);

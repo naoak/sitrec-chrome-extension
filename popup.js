@@ -1,5 +1,19 @@
 document.addEventListener('DOMContentLoaded', function() {
-  var inputNames = ['resolveUrl', 'url', 'album', 'fps'];
+  var inputNames = [
+    'resolveUrl',
+    'url',
+    'album',
+    'losstime',
+    'fps'
+  ];
+  var inputDefaults = [
+    'http://www.example.com/empty',
+    'http://www.example.com/',
+    '',
+    0,
+    10
+  ];
+
   var inputs = inputNames.reduce(function(memo, key) {
     memo[key] = document.getElementById(key);
     return memo;
@@ -7,22 +21,18 @@ document.addEventListener('DOMContentLoaded', function() {
   var recordBtn = document.getElementById('toggleRecord');
 
   chrome.storage.sync.get(inputNames, function(items) {
-    inputs.resolveUrl.value = items.resolveUrl || 'http://www.example.com/empty';
-    inputs.url.value = items.url || 'http://www.example.com/';
-    inputs.album.value = items.album || '';
-    inputs.fps.value = items.fps || 10;
+    inputNames.forEach(function(key, i) {
+      inputs[key].value = items[key] || inputDefaults[i];
+    });
   });
 
   recordBtn.addEventListener('click', function() {
-    chrome.runtime.sendMessage({
-      toggleRecord: {
-        resolveUrl: inputs.resolveUrl.value,
-        url: inputs.url.value,
-        album: inputs.album.value,
-        fps: inputs.fps.value,
-        enableHar: true
-      }
-    }, function(response) {
+    var options = {};
+    inputNames.forEach(function(key) {
+      options[key] = inputs[key].value;
+    });
+    options.enableHar = true;
+    chrome.runtime.sendMessage({toggleRecord: options}, function(response) {
       recordBtn.value = response.isRecording ? 'stop' : 'rec';
     });
   });
