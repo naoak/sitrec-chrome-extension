@@ -19,7 +19,7 @@ function decodeDataUri(dataUri) {
 
 app.use(bodyParser.json({limit: '50mb'}));
 
-app.get('/album/list', function(req, res) {
+app.get('/api/album/list', function(req, res) {
   fs.readdir(DATA_DIR, function(err, dirs) {
     if (!err) {
       res.json({
@@ -36,7 +36,7 @@ app.get('/album/list', function(req, res) {
   });
 });
 
-app.post('/album/create', function(req, res) {
+app.post('/api/album/create', function(req, res) {
   var albumDir;
   var albumName = req.body && req.body.name;
 
@@ -58,7 +58,7 @@ app.post('/album/create', function(req, res) {
   }
 });
 
-app.post('/photo/create/:albumName/:photoName', function(req, res) {
+app.post('/api/photo/create/:albumName/:photoName', function(req, res) {
   var albumName = req.params.albumName;
   var photoName = req.params.photoName;
   var dataURI = req.body.dataURI;
@@ -92,7 +92,7 @@ app.post('/photo/create/:albumName/:photoName', function(req, res) {
   }
 });
 
-app.post('/har/create/:albumName', function(req, res) {
+app.post('/api/har/create/:albumName', function(req, res) {
   var albumName = req.params.albumName;
   var harLog = req.body.har;
   var harBuffer = JSON.stringify(harLog);

@@ -1,9 +1,9 @@
 var PROTOCOL = 'http';
 var DOMAIN = 'localhost:8080'
-var CREATE_ALBUM_URL = PROTOCOL + '://' + DOMAIN + '/album/create';
-var LIST_ALBUM_URL = PROTOCOL + '://' + DOMAIN + '/album/list';
-var CREATE_PHOTO_URL = PROTOCOL + '://' + DOMAIN + '/photo/create/{{albumName}}/{{photoName}}';
-var CREATE_HAR_URL = PROTOCOL + '://' + DOMAIN + '/har/create/{{albumName}}';
+var CREATE_ALBUM_URL = PROTOCOL + '://' + DOMAIN + '/api/album/create';
+var LIST_ALBUM_URL = PROTOCOL + '://' + DOMAIN + '/api/album/list';
+var CREATE_PHOTO_URL = PROTOCOL + '://' + DOMAIN + '/api/photo/create/{{albumName}}/{{photoName}}';
+var CREATE_HAR_URL = PROTOCOL + '://' + DOMAIN + '/api/har/create/{{albumName}}';
 
 function getOrCreateAlbum(albumName, callback) {
   getAlbum(albumName, function(album) {
