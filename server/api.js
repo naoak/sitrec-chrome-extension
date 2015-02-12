@@ -1,11 +1,11 @@
-var DATA_DIR = 'screenshots';
-
 var fs = require('fs');
+var path = require('path');
 var mkdirp = require('mkdirp');
 var path = require('path');
 var express = require('express');
 var app = express();
 
+var DATA_DIR = path.join('public', 'screenshots');
 
 module.exports = function(options) {
   DATA_DIR = (options && options.dataDir) || DATA_DIR;

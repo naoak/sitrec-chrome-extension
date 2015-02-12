@@ -1,0 +1,13 @@
+{{#each albums}}
+<div class="album">
+  <h2>{{name}}</h2>
+  {{#each images}}
+  <div class="frame">
+    <a class="frame-link" href="{{path}}">
+      <img class="thumbnail" src="{{path}}"/>
+      <span class="ms">{{ms}}</span>
+    </a>
+  </div>
+  {{/each}}
+</div>
+{{/each}}
