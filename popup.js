@@ -1,18 +1,17 @@
 document.addEventListener('DOMContentLoaded', function() {
-  var inputNames = [
-    'resolveUrl',
-    'url',
-    'album',
-    'losstime',
-    'fps'
+  var inputInfos = [
+    {name: 'resolveUrl', default: 'http://www.example.com/empty'},
+    {name: 'url', default: 'http://www.example.com/'},
+    {name: 'album', default: ''},
+    {name: 'losstime', default: 0},
+    {name: 'fps', default: 10}
   ];
-  var inputDefaults = [
-    'http://www.example.com/empty',
-    'http://www.example.com/',
-    '',
-    0,
-    10
-  ];
+  var inputNames = inputInfos.map(function(info) {
+    return info.name;
+  });
+  var inputDefaults = inputInfos.map(function(info) {
+    return info.default;
+  });
 
   var inputs = inputNames.reduce(function(memo, key) {
     memo[key] = document.getElementById(key);
