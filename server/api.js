@@ -129,7 +129,7 @@ app.post('/har/create/:albumName', function(req, res) {
   }
 });
 
-app.get('/har/get-dev/:albumName', function(req, res) {
+app.get('/dev-har/get/:albumName', function(req, res) {
   var albumName = req.params.albumName;
   var harLog;
   var albumDir;
