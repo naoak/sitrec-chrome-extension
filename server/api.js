@@ -128,3 +128,28 @@ app.post('/har/create/:albumName', function(req, res) {
     res.status(400).send('Bad Request');
   }
 });
+
+app.get('/har/get-dev/:albumName', function(req, res) {
+  var albumName = req.params.albumName;
+  var harLog;
+  var albumDir;
+
+  console.log(albumName);
+
+  if (albumName) {
+    albumDir = path.join(DATA_DIR, albumName);
+    var harPath = path.join(albumDir, 'dev.har');
+    fs.readFile(harPath, function(err, data) {
+      if (!err) {
+        res.type('application/json').send(data);
+      }
+      else {
+        res.status(404).send('Not found har files');
+      }
+    });
+  }
+  else {
+    res.status(400).send('Bad Request');
+  }
+});
+
