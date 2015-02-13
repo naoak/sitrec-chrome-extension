@@ -134,8 +134,6 @@ app.get('/dev-har/get/:albumName', function(req, res) {
   var harLog;
   var albumDir;
 
-  console.log(albumName);
-
   if (albumName) {
     albumDir = path.join(DATA_DIR, albumName);
     var harPath = path.join(albumDir, 'dev.har');
