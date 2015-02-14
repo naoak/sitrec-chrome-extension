@@ -28,6 +28,7 @@ HomeTab.prototype = Lib.extend(TabView.Tab.prototype,
 
     onUpdateBody: function(tabView, body)
     {
+        var self = this;
         body = this.bodyTag.replace({}, body);
 
         // Content of this tab is loaded by default (required above) since it's
@@ -55,6 +56,23 @@ HomeTab.prototype = Lib.extend(TabView.Tab.prototype,
 
         // Load examples
         $(".example").click(Lib.bind(this.onLoadExample, this));
+
+        // Load album name list
+        $.get('/api/album/list', function(data) {
+            var albumList = $('.albumList');
+            var content = data.items.reduce(function(memo, name) {
+                var anchor = '<a class="albumName" href="#">' + name + '</a>';
+                return memo + '<li>' + anchor + '</li>';
+            }, '');
+            albumList.html(content);
+            $('.albumName').bind('click', function(e) {
+                e.preventDefault();
+                var albumName = $(this).text();
+                $.get('/api/dev-har/get/' + albumName, function(data) {
+                    self.onAppendPreview(data);
+                }, "text");
+            });
+        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -62,9 +80,6 @@ HomeTab.prototype = Lib.extend(TabView.Tab.prototype,
 
     onAppendPreview: function(jsonString)
     {
-        if (!jsonString)
-            jsonString = $("#sourceEditor").val();
-
         if (jsonString)
             this.tabView.appendPreview(jsonString);
     },
@@ -162,7 +177,6 @@ HomeTab.prototype = Lib.extend(TabView.Tab.prototype,
 
     loadInProgress: function(show, msg)
     {
-        $("#sourceEditor").val(show ? (msg ? msg : Strings.loadingHar) : "");
     }
 });
 

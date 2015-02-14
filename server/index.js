@@ -7,7 +7,6 @@ var api = require('./api');
 var serveStatic = require('serve-static');
 var serveIndex = require('serve-index');
 var app = express();
-var albumDirs;
 var publicDir = path.join(__dirname, 'public');
 
 var DATA_DIR = path.join('public', 'screenshots');
@@ -17,10 +16,6 @@ app.use('/api', api.server(DATA_DIR));
 
 app.engine('hbs', exphbs({extname: 'hbs', defaultLayout: 'main'}));
 app.set('view engine', 'hbs');
-
-function endsWith(text, suffix) {
-  return text.indexOf(suffix, text.length - suffix.length) !== -1;
-}
 
 app.get('/', function(req, res) {
   api.getAlbumDirs().then(function(dirs) {

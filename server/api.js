@@ -126,19 +126,15 @@ function endsWith(text, suffix) {
 }
 
 app.get('/album/list', function(req, res) {
-  fs.readdir(DATA_DIR, function(err, dirs) {
-    if (!err) {
-      res.json({
-        items: dirs.map(function(dir) {
-          return {name: dir};
-        })
-      });
-    }
-    else {
-      res.json({
-        items: []
-      });
-    }
+  getAlbumDirs().then(function(albumDirs) {
+    var albumNames = albumDirs.map(function(dir) {
+      return path.basename(dir);
+    });
+    res.json({
+      items: albumNames
+    });
+  }).fail(function() {
+    res.status('500').send('Failed to found album dirs');
   });
 });
 
@@ -237,14 +233,28 @@ app.get('/dev-har/get/:albumName', function(req, res) {
   var albumDir;
 
   if (albumName) {
-    albumDir = path.join(DATA_DIR, albumName);
-    var harPath = path.join(albumDir, 'dev.har');
-    fs.readFile(harPath, function(err, data) {
-      if (!err) {
-        res.type('application/json').send(data);
+    getAlbumDirs().then(function(albumDirs) {
+      var names = albumDirs.map(function(dir) {
+        return path.basename(dir);
+      });
+      var idx;
+      var dir;
+      var harPath;
+      idx = names.indexOf(albumName);
+      if (idx > -1) {
+        dir = albumDirs[idx];
+        harPath = path.join(dir, 'dev.har');
+        fs.readFile(harPath, function(err, data) {
+          if (!err) {
+            res.type('application/json').send(data);
+          }
+          else {
+            res.status(404).send('Not found har files');
+          }
+        });
       }
       else {
-        res.status(404).send('Not found har files');
+        res.status(404).send('Not found album');
       }
     });
   }
