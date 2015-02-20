@@ -93,23 +93,25 @@ function startRecording(options) {
     }, 1000 / fps);
     timer.start();
   }
-  if (options.resolveUrl) {
-    onResolveLoadListener = function(details) {
-      if (options.resolveUrl.split('#')[0] == details.url.split('#')[0]) {
-        chrome.webNavigation.onCompleted.removeListener(onResolveLoadListener);
-        setTimeout(function() {
-          load();
-        }, RESOLVE_DELAY);
+  setProxy(options, function() {
+    if (options.resolveUrl) {
+      onResolveLoadListener = function(details) {
+        if (options.resolveUrl.split('#')[0] == details.url.split('#')[0]) {
+          chrome.webNavigation.onCompleted.removeListener(onResolveLoadListener);
+          setTimeout(function() {
+            load();
+          }, RESOLVE_DELAY);
+        }
       }
+      chrome.webNavigation.onCompleted.addListener(onResolveLoadListener);
+      chrome.tabs.update({
+        url: options.resolveUrl
+      });
     }
-    chrome.webNavigation.onCompleted.addListener(onResolveLoadListener);
-    chrome.tabs.update({
-      url: options.resolveUrl
-    });
-  }
-  else {
-    load();
-  }
+    else {
+      load();
+    }
+  });
 }
 
 function takePhoto(i, images, callback) {
@@ -156,12 +158,40 @@ function stopRecording() {
     }
   }
   timer.stop();
-  doStop();
+  clearProxy(doStop);
 }
 
 function showVideoPlaybackPage() {
   var playbackUrl = chrome.extension.getURL('playback.html');
   chrome.tabs.create({url: playbackUrl});
+}
+
+function setProxy(options, callback) {
+  var httpProxy = options.httpProxy;
+  if (httpProxy) {
+    var parts = httpProxy.split(':');
+    var hostName = parts[0];
+    var port = parts.length >= 2 ? parseInt(parts[1], 10) : 80;
+    var proxyConfig = {
+      mode: "fixed_servers",
+      rules: {
+        proxyForHttp: {
+          scheme: "http",
+          host: hostName,
+          port: port
+        },
+        bypassList: ["localhost"]
+      }
+    };
+    chrome.proxy.settings.set({value: proxyConfig, scope: 'regular'}, callback);
+  }
+  else {
+    clearProxy(callback);
+  }
+}
+
+function clearProxy(callback) {
+  chrome.proxy.settings.clear({scope: 'regular'}, callback);
 }
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {

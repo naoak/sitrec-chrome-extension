@@ -16,6 +16,6 @@
      "default_title": "Start recording.",
      "default_icon": "images/icon.png"
    },
-  "permissions": ["tabs", "webNavigation", "<all_urls>", "storage"],
+  "permissions": ["tabs", "webNavigation", "<all_urls>", "storage", "proxy"],
   "web_accessible_resources": ["*"]
 }
