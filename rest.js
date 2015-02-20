@@ -1,5 +1,5 @@
 var PROTOCOL = 'http';
-var DOMAIN = 'localhost:8080'
+var DOMAIN = 'localhost:11080'
 var CREATE_ALBUM_URL = PROTOCOL + '://' + DOMAIN + '/api/album/create';
 var LIST_ALBUM_URL = PROTOCOL + '://' + DOMAIN + '/api/album/list';
 var CREATE_PHOTO_URL = PROTOCOL + '://' + DOMAIN + '/api/photo/create/{{albumName}}/{{photoName}}';

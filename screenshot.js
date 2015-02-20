@@ -1,5 +1,3 @@
-var DEFAULT_FPS = 10;
-var DEFAULT_LOSSTIME = 0;
 var QUALITY = 50;
 var RESOLVE_DELAY = 500;
 var fps;
@@ -66,8 +64,8 @@ IntervalTimer.prototype.setProcedure = function(proc) {
 
 function startRecording(options) {
   var i = 0;
-  fps = parseInt((options.fps || DEFAULT_FPS), 10);
-  losstime = parseInt((options.losstime || DEFAULT_LOSSTIME), 10);
+  fps = parseInt(options.fps, 10);
+  losstime = parseInt(options.losstime, 10);
   enableHar = options.enableHar;
   album = options.album || '';
   chrome.browserAction.setIcon({path: 'images/icon-rec.png'});
