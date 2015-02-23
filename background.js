@@ -51,7 +51,12 @@ IntervalTimer.prototype.start = function() {
 
 IntervalTimer.prototype.stop = function(callback) {
   if (callback) {
-    this.gracefullStopCallback = callback;
+    if (this.timer) {
+      this.gracefullStopCallback = callback;
+    }
+    else {
+      callback();
+    }
   }
   else {
     clearTimeout(this.timer);
@@ -69,6 +74,7 @@ IntervalTimer.prototype.setProcedure = function(proc) {
 
 function startRecording(options) {
   var i = 0;
+  isRecording = true;
   server = options.server;
   fps = parseInt(options.fps, 10);
   losstime = parseInt(options.losstime, 10);
@@ -136,6 +142,7 @@ function takePhoto(i, images, callback) {
 }
 
 function stopRecording() {
+  isRecording = false;
   function doStop() {
     if (onLoadListener) {
       chrome.webNavigation.onCompleted.removeListener(onLoadListener);
@@ -155,16 +162,25 @@ function stopRecording() {
             showVideoPlaybackPage();
           }
         }
-        port.onMessage.addListener(harListener);
-        port.postMessage({requestHar: true});
+        if (port) {
+          port.onMessage.addListener(harListener);
+          port.postMessage({requestHar: true});
+        }
+        else {
+          console.log('Devtools seems to be an invalid state.');
+          showVideoPlaybackPage();
+        }
       });
     }
     else {
       showVideoPlaybackPage();
     }
   }
-  timer.stop();
-  clearProxy(stopTc(doStop));
+  timer.stop(function() {
+    clearProxy(function () {
+      stopTc(doStop);
+    });
+  });
 }
 
 function showVideoPlaybackPage() {
@@ -259,18 +275,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     else {
       startRecording(request.toggleRecord);
     }
-    isRecording = !isRecording;
     sendResponse({isRecording: isRecording});
-  }
-});
-
-chrome.browserAction.onClicked.addListener(function(tab) {
-  if (isRecording) {
-    stopRecording();
-    isRecording = !isRecording;
-  }
-  else {
-    chrome.browserAction.setPopup({popup: 'popup.html'});
   }
 });
 
@@ -295,3 +300,5 @@ chrome.runtime.onConnect.addListener(function(port) {
     });
   }
 });
+
+chrome.browserAction.setPopup({popup: 'popup.html'});
