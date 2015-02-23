@@ -6,6 +6,7 @@ var images = background.images;
 var harLog = background.harLog;
 var albumPrefix = background.album;
 var startDate = background.startDate;
+var server = background.server;
 var startDateFormatted = formatDate(new Date(startDate));
 var currentIndex = 0;
 var $image;
@@ -126,7 +127,7 @@ function setIndex(index) {
 function uploadAll() {
   setState('upload');
   setProgress(0);
-  getOrCreateAlbum(albumPrefix + '-' + startDateFormatted, function(album) {
+  getOrCreateAlbum(server, albumPrefix + '-' + startDateFormatted, function(album) {
     uploadNext(album, 0);
   });
 }
@@ -144,7 +145,7 @@ function uploadNext(album, i) {
     photoName = '' + (image.index * (1000 / background.fps));
     dataUri = image.data;
 
-    uploadPhoto(album.name, photoName, dataUri, function(data) {
+    uploadPhoto(server, album.name, photoName, dataUri, function(data) {
       setProgress(((i + 1) / images.length) * 100);
       uploadNext(album, i + 1);
     }, function(loaded, total) {
@@ -153,7 +154,7 @@ function uploadNext(album, i) {
   }
   else {
     if (harLog) {
-      uploadHar(album.name, harLog, function() {
+      uploadHar(server, album.name, harLog, function() {
         setSharedInfo(album.name, 'All images and HAR have been uploaded.');
         setState('shared');
       });

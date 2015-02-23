@@ -1,5 +1,6 @@
 var QUALITY = 50;
 var RESOLVE_DELAY = 500;
+var server;
 var fps;
 var losstime;
 var album;
@@ -64,6 +65,7 @@ IntervalTimer.prototype.setProcedure = function(proc) {
 
 function startRecording(options) {
   var i = 0;
+  server = options.server;
   fps = parseInt(options.fps, 10);
   losstime = parseInt(options.losstime, 10);
   enableHar = options.enableHar;

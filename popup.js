@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   var inputInfos = [
     {name: 'album', default: ''},
+    {name: 'server', default: 'localhost:11080'},
     {name: 'httpProxy', default: 'localhost:11001'},
     {name: 'initialUrl', default: 'http://www.example.com/empty'},
     {name: 'url', default: 'http://www.example.com/'},
