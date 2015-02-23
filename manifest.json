@@ -1,8 +1,8 @@
 {
-  "name": "Screencast (customized for local server)",
-  "version": "0.3",
+  "name": "sitrec-chrome-extension",
+  "version": "0.4.0",
   "manifest_version": 2,
-  "description": "Records a video of your chrome browser. Lets you share out the video or stills of the video.",
+  "description": "Capture screenshots on a chrome tab during loading a site, and then save a HAR file after loaded.",
   "devtools_page": "devtools.html",
   "icons": {
     "128": "images/icon.png",
