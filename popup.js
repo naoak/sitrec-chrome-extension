@@ -19,12 +19,18 @@ document.addEventListener('DOMContentLoaded', function() {
     memo[key] = document.getElementById(key);
     return memo;
   }, {});
+  var viewBtn = document.getElementById('view');
   var recordBtn = document.getElementById('toggleRecord');
 
   chrome.storage.sync.get(inputNames, function(items) {
     inputNames.forEach(function(key, i) {
       inputs[key].value = items[key] || inputDefaults[i];
     });
+  });
+
+  viewBtn.addEventListener('click', function() {
+    var server = inputs['server'].value;
+    chrome.tabs.create({url: server});
   });
 
   recordBtn.addEventListener('click', function() {
