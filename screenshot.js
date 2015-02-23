@@ -92,9 +92,9 @@ function startRecording(options) {
     timer.start();
   }
   setProxy(options, function() {
-    if (options.resolveUrl) {
+    if (options.initialUrl) {
       onResolveLoadListener = function(details) {
-        if (options.resolveUrl.split('#')[0] == details.url.split('#')[0]) {
+        if (options.initialUrl.split('#')[0] == details.url.split('#')[0]) {
           chrome.webNavigation.onCompleted.removeListener(onResolveLoadListener);
           setTimeout(function() {
             load();
@@ -103,7 +103,7 @@ function startRecording(options) {
       }
       chrome.webNavigation.onCompleted.addListener(onResolveLoadListener);
       chrome.tabs.update({
-        url: options.resolveUrl
+        url: options.initialUrl
       });
     }
     else {

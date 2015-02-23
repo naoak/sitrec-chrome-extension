@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var inputInfos = [
     {name: 'album', default: ''},
     {name: 'httpProxy', default: 'localhost:11001'},
-    {name: 'resolveUrl', default: 'http://www.example.com/empty'},
+    {name: 'initialUrl', default: 'http://www.example.com/empty'},
     {name: 'url', default: 'http://www.example.com/'},
     {name: 'losstime', default: 0},
     {name: 'fps', default: 10}
