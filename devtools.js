@@ -1,5 +1,5 @@
 var backgroundPageConnection = chrome.runtime.connect({
-  name: 'screencast'
+  name: 'sitrec'
 });
 
 backgroundPageConnection.postMessage({

@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     memo[key] = document.getElementById(key);
     return memo;
   }, {});
+  var throttle = document.getElementById('throttle');
   var viewBtn = document.getElementById('view');
   var recordBtn = document.getElementById('toggleRecord');
 
@@ -28,6 +29,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  chrome.storage.sync.get(['throttle'], function(items) {
+    var value = items['throttle'];
+    var i;
+    for (i = 0; i < throttle.options.length; i++) {
+      if (throttle.options[i].value == value) {
+        break;
+      }
+    }
+    if (i == throttle.options.length) {
+      i = 0;
+    }
+    throttle.selectedIndex = i;
+  });
+
   viewBtn.addEventListener('click', function() {
     var server = inputs['server'].value;
     chrome.tabs.create({url: server});
@@ -35,9 +50,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
   recordBtn.addEventListener('click', function() {
     var options = {};
+    var tcValue = throttle.options[throttle.selectedIndex].value;
+    var tcParts = tcValue ? tcValue.split(':') : [];
     inputNames.forEach(function(key) {
       options[key] = inputs[key].value;
     });
+    if (tcValue) {
+      options.throttle = {
+        rate: tcParts[0],
+        delay: tcParts[1]
+      };
+    }
+    else {
+      options.throttle = null;
+    }
     options.enableHar = true;
     chrome.runtime.sendMessage({toggleRecord: options}, function(response) {
       recordBtn.value = response.isRecording ? 'stop' : 'rec';
@@ -50,5 +76,10 @@ document.addEventListener('DOMContentLoaded', function() {
       obj[key] = inputs[key].value;
       chrome.storage.sync.set(obj);
     });
+  });
+
+  throttle.addEventListener('change', function() {
+    var value = throttle.options[throttle.selectedIndex].value;
+    chrome.storage.sync.set({throttle: value});
   });
 });

@@ -2,6 +2,10 @@ body {
   width: 320px;
 }
 
+label {
+  display: block;
+}
+
 input[type=url] {
   width: 300px;
   margin-bottom: 10px;
@@ -27,7 +31,6 @@ input[type=button] {
   margin: 10px auto;
 }
 
-label {
-  display: block;
-  width: 100px;
+select {
+  margin-bottom: 10px;
 }
