@@ -68,7 +68,7 @@ function startRecording(options) {
   losstime = parseInt(options.losstime, 10);
   enableHar = options.enableHar;
   album = options.album || '';
-  chrome.browserAction.setIcon({path: 'images/icon-rec.png'});
+  chrome.browserAction.setIcon({path: 'images/sc-rec.png'});
   chrome.browserAction.setTitle({title: 'Stop recording.'});
   images = [];
 
@@ -133,7 +133,7 @@ function stopRecording() {
       chrome.webNavigation.onCompleted.removeListener(onLoadListener);
       onLoadListener = null;
     }
-    chrome.browserAction.setIcon({path: 'images/icon.png'});
+    chrome.browserAction.setIcon({path: 'images/sc.png'});
     chrome.browserAction.setTitle({title: 'Start recording.'});
     if (enableHar) {
       chrome.tabs.getSelected(null, function(tab) {

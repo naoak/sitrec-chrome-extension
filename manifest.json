@@ -5,9 +5,9 @@
   "description": "Capture screenshots on a chrome tab during loading a site, and then save a HAR file after loaded.",
   "devtools_page": "devtools.html",
   "icons": {
-    "128": "images/icon.png",
-    "48": "images/icon.png",
-    "16": "images/icon.png"
+    "128": "images/sc.png",
+    "48": "images/sc.png",
+    "16": "images/sc.png"
   },
   "background": {
     "scripts": ["background.js"]
