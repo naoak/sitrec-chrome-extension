@@ -1,3 +1,8 @@
+chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+  var currentTab = tabs[0];
+  chrome.runtime.sendMessage({targetTabId: currentTab.id});
+});
+
 document.addEventListener('DOMContentLoaded', function() {
   var inputInfos = [
     {name: 'album', default: ''},

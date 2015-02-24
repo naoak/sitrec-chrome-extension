@@ -14,8 +14,16 @@
   },
   "browser_action": {
      "default_title": "Start recording.",
-     "default_icon": "images/sc.png"
+     "default_icon": "images/sc.png",
+     "default_popup": "popup.html"
    },
-  "permissions": ["tabs", "webNavigation", "<all_urls>", "storage", "proxy"],
+  "permissions": [
+    "tabs",
+    "webNavigation",
+    "webRequest",
+    "<all_urls>",
+    "storage",
+    "proxy"
+  ],
   "web_accessible_resources": ["*"]
 }

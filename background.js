@@ -11,6 +11,7 @@ var album;
 var enableHar;
 
 var harLog = null;
+var requestHook = new RequestHook();
 var isRecording = false;
 var timer = null;
 var images = [];
@@ -47,7 +48,7 @@ IntervalTimer.prototype.start = function() {
     }
   }
   self.timer = setTimeout(instance, span);
-}
+};
 
 IntervalTimer.prototype.stop = function(callback) {
   if (callback) {
@@ -62,15 +63,83 @@ IntervalTimer.prototype.stop = function(callback) {
     clearTimeout(this.timer);
     this.timer = null;
   }
-}
+};
 
 IntervalTimer.prototype.isActive = function() {
   return !!this.timer;
-}
+};
 
 IntervalTimer.prototype.setProcedure = function(proc) {
   this.proc = proc;
+};
+
+function RequestHook() {
+  this.isHook = false;
+  this.details = [];
+  this.targetTabId = -1;
 }
+
+RequestHook.prototype.startHook = function() {
+  this.isHook = true;
+  this.details = [];
+};
+
+RequestHook.prototype.stopHook = function() {
+  this.isHook = false;
+};
+
+RequestHook.prototype.onBeforeRequest = function(details) {
+  if (details.tabId == -1) {
+    return;
+  }
+  if (details.tabId == this.targetTabId) {
+    if (this.isHook) {
+      this.details.push(details);
+    }
+  }
+};
+
+RequestHook.prototype.fixHAR = function(har) {
+  if (this.isHook) {
+    var details = clone(this.details);
+    if (har.log) {
+      // Remove favicon.ico
+      details = details.filter(function(d) {
+        return d.url.indexOf('favicon.ico') === -1;
+      });
+      // Set page start time
+      if (har.log.pages.length === 1 && details.length > 0) {
+        har.log.pages[0].startedDateTime = toUTCString(new Date(details[0].timeStamp));
+      }
+      // Remove inline data entry
+      har.log.entries = har.log.entries.filter(function(entry) {
+        return entry.request.url.indexOf('data:') === -1;
+      });
+      // Set entry start time
+      har.log.entries = har.log.entries.map(function(entry) {
+        if (typeof entry.startedDateTime === 'object' && Object.keys(entry.startedDateTime).length === 0) {
+          for (var i = 0; i < details.length; i++) {
+            var d = details[i];
+            if (d.url == entry.request.url) {
+              entry.startedDateTime = toUTCString(new Date(d.timeStamp));
+              details.splice(i, 1);
+              break;
+            }
+          }
+        }
+        return entry;
+      });
+      if (details.length > 0) {
+        alert(details.length + " request entries remain not to match");
+        details.forEach(function(d) {
+          alert(d.url);
+        });
+      }
+    }
+
+  }
+  return har;
+};
 
 function startRecording(options) {
   var i = 0;
@@ -94,6 +163,9 @@ function startRecording(options) {
     };
     chrome.webNavigation.onCompleted.addListener(onLoadListener);
     startDate = Date.now();
+    if (enableHar) {
+      requestHook.startHook();
+    }
     chrome.tabs.update({
       url: options.url
     });
@@ -155,9 +227,10 @@ function stopRecording() {
         var port = connections[tab.id];
         function harListener(message) {
           if (message.responseHar) {
-            harLog = {
+            harLog = requestHook.fixHAR({
               log: message.responseHar
-            };
+            });
+            requestHook.stopHook();
             port.onMessage.removeListener(harListener);
             showVideoPlaybackPage();
           }
@@ -167,7 +240,8 @@ function stopRecording() {
           port.postMessage({requestHar: true});
         }
         else {
-          console.log('Devtools seems to be an invalid state.');
+          requestHook.stopHook();
+          alert('To take a HAR file, DevTools must have be opened');
           showVideoPlaybackPage();
         }
       });
@@ -267,6 +341,41 @@ function clearProxy(callback) {
   chrome.proxy.settings.clear({scope: 'regular'}, callback);
 }
 
+function toUTCString(date) {
+  function padZero(digits, num) {
+    var result;
+    digits = '' + digits;
+    result = digits;
+    for (var i = 0; i < num - digits.length; i++) {
+      result = '0' + result;
+    }
+    return result;
+  }
+  var yy = padZero(date.getUTCFullYear(), 4);
+  var MM = padZero(date.getUTCMonth() + 1, 2);
+  var dd = padZero(date.getUTCDate(), 2);
+  var hh = padZero(date.getUTCHours(), 2);
+  var mm = padZero(date.getUTCMinutes(), 2);
+  var ss = padZero(date.getUTCSeconds(), 2);
+  var SS = padZero(date.getUTCMilliseconds(), 4);
+  return yy + '-' + MM + '-' + dd + 'T' + hh + ':' + mm + ':' + ss + '.' + SS + 'Z';
+}
+
+function clone(obj) {
+  var temp;
+  if (obj == null || typeof(obj) != 'object') {
+    return obj;
+  }
+  temp = obj.constructor();
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      temp[key] = clone(obj[key]);
+    }
+  }
+  return temp;
+}
+
+// Handle messages from popup window
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.toggleRecord) {
     if (isRecording) {
@@ -277,8 +386,13 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
     sendResponse({isRecording: isRecording});
   }
+  else if (request.targetTabId) {
+    requestHook.targetTabId = request.targetTabId;
+    sendResponse(null);
+  }
 });
 
+// Handle connections to Devtools
 chrome.runtime.onConnect.addListener(function(port) {
   if (port.name == 'sitrec') {
     var extensionListener = function(message, sender, sendResponse) {
@@ -301,4 +415,4 @@ chrome.runtime.onConnect.addListener(function(port) {
   }
 });
 
-chrome.browserAction.setPopup({popup: 'popup.html'});
+chrome.webRequest.onBeforeRequest.addListener(requestHook.onBeforeRequest.bind(requestHook), {urls: ["<all_urls>"]});
