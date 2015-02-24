@@ -92,11 +92,14 @@ button:hover {
   box-shadow: inset 0 0 20px #666;
 }
 
-#frameIndex {
+#seekTime {
+  display: block;
   height: 48px;
+  width: 60px;
   line-height: 48px;
   color: #fff;
   font-size: 20px;
+  text-align: right;
 }
 
 #playpause {

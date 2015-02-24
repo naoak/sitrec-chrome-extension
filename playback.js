@@ -13,7 +13,7 @@ var $image;
 var $slider;
 var $playpause;
 var $still;
-var $frameIndex;
+var $seekTime;
 var timer = new IntervalTimer(null, 1000 / background.fps);
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
   $slider = $('#slider');
   $playpause = $('#playpause');
   $still = $('#still');
-  $frameIndex = $('#frameIndex');
+  $seekTime = $('#seekTime');
 
   $slider.setAttribute('min', 0);
   $slider.setAttribute('max', images.length - 1);
@@ -121,7 +121,7 @@ function setIndex(index) {
   currentIndex = index;
   // TODO: validate index
   $image.src = images[index].data;
-  $frameIndex.textContent = '' + index;
+  $seekTime.textContent = '' + (index * 1000 / background.fps);
 }
 
 function uploadAll() {
