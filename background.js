@@ -241,7 +241,7 @@ function stopRecording() {
         }
         else {
           requestHook.stopHook();
-          alert('To take a HAR file, DevTools must have be opened');
+          alert('To take a HAR file, DevTools must have been opened');
           showVideoPlaybackPage();
         }
       });
