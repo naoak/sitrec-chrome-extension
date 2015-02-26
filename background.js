@@ -1,24 +1,191 @@
-var TC_STATUS_PATH = '/api/tc/status';
-var TC_START_PATH = '/api/tc/start/{{rate}}/{{delay}}';
-var TC_STOP_PATH = '/api/tc/stop';
-var QUALITY = 50;
 var INITIAL_DELAY = 500;
 
-var server;
-var fps;
-var losstime;
-var album;
-var enableHar;
+var recorder = new Recorder();
 
-var harLog = null;
-var requestHook = new RequestHook();
-var isRecording = false;
-var timer = null;
-var images = [];
-var startDate;
-var onResolveLoadListener = null;
-var onLoadListener = null;
-var connections = {};
+function Recorder() {
+  var self = this;
+  this.quality = 50;
+  this.isRecording = false;
+  this.images = [];
+  this.timer = null;
+  this.startDate = 0;
+  this.harLog = null;
+  this.connections = {};
+  this.onLoadListener = null;
+  this.proxy = new Proxy();
+  this.requestHook = new RequestHook();
+
+  function connectWithPopupWindow() {
+    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+      if (request.toggleRecord) {
+        if (self.isRecording) {
+          self.stop();
+        }
+        else {
+          self.start(request.toggleRecord);
+        }
+        sendResponse({isRecording: self.isRecording});
+      }
+      else if (request.targetTabId) {
+        self.requestHook.targetTabId = request.targetTabId;
+        sendResponse(null);
+      }
+    });
+  }
+
+  function connectWithDevTools() {
+    chrome.runtime.onConnect.addListener(function(port) {
+      if (port.name == 'sitrec') {
+        var extensionListener = function(message, sender, sendResponse) {
+          if (message.name == 'init') {
+            self.connections[message.tabId] = port;
+            return;
+          }
+        }
+        port.onMessage.addListener(extensionListener);
+        port.onDisconnect.addListener(function(port) {
+          port.onMessage.removeListener(extensionListener);
+          var tabs = Object.keys(self.connections);
+          for (var i = 0, len = tabs.length; i < len; i++) {
+            if (self.connections[tabs[i]] == port) {
+              delete self.connections[tabs[i]]
+              break;
+            }
+          }
+        });
+      }
+    });
+  }
+
+  connectWithPopupWindow();
+  connectWithDevTools();
+};
+
+Recorder.prototype.start = function(options) {
+  var self = this;
+  var index = 0;
+
+  options.server = (options.server.lastIndexOf('/') === options.server.length - 1) ? options.server.slice(0, options.length - 1) : options.server;
+  self.isRecording = true;
+  self.options = options;
+  self.server = options.server;
+  self.fps = parseInt(options.fps, 10);
+  self.losstime = parseInt(options.losstime, 10);
+  self.album = options.album || '';
+  self.tc = new TrafficControl(options.server);
+  self.images = [];
+
+  chrome.browserAction.setIcon({path: 'images/sc-rec.png'});
+  chrome.browserAction.setTitle({title: 'Stop recording.'});
+
+  function load() {
+    self.onLoadListener = function(details) {
+      if (details.url.split('#')[0].indexOf(options.url.split('#')[0]) == 0) {
+        setTimeout(function() {
+          self.stop();
+        }, self.losstime);
+      }
+    };
+    chrome.webNavigation.onCompleted.addListener(self.onLoadListener);
+    self.startDate = Date.now();
+    if (self.options.enableHar) {
+      self.requestHook.start();
+    }
+    chrome.tabs.update({
+      url: options.url
+    });
+    self.takeScreenCapture(index);
+    self.timer = new IntervalTimer(function() {
+      self.takeScreenCapture(++index);
+    }, 1000 / self.fps);
+    self.timer.start();
+  }
+
+  self.tc.start(options, function() {
+    self.proxy.set(options, function() {
+      if (options.initialUrl) {
+        var onInitialLoadListener = function(details) {
+          if (options.initialUrl.split('#')[0] == details.url.split('#')[0]) {
+            chrome.webNavigation.onCompleted.removeListener(onInitialLoadListener);
+            setTimeout(function() {
+              load();
+            }, INITIAL_DELAY);
+          }
+        }
+        chrome.webNavigation.onCompleted.addListener(onInitialLoadListener);
+        chrome.tabs.update({
+          url: options.initialUrl
+        });
+      }
+      else {
+        load();
+      }
+    });
+  });
+};
+
+Recorder.prototype.takeScreenCapture = function(index, callback) {
+  var self = this;
+  chrome.browserAction.setBadgeText({text: '' + index});
+  chrome.tabs.captureVisibleTab(null, {quality: self.quality}, function(img) {
+    img = img ? img : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    self.images.push({
+      index: index,
+      time: Date.now() - self.startDate,
+      data: img
+    });
+    if (callback) {
+      callback();
+    }
+  });
+};
+
+Recorder.prototype.stop = function() {
+  var self = this;
+  self.isRecording = false;
+
+  function doStop() {
+    if (self.onLoadListener) {
+      chrome.webNavigation.onCompleted.removeListener(self.onLoadListener);
+      self.onLoadListener = null;
+    }
+    chrome.browserAction.setIcon({path: 'images/sc.png'});
+    chrome.browserAction.setTitle({title: 'Start recording.'});
+    if (self.options.enableHar) {
+      chrome.tabs.getSelected(null, function(tab) {
+        var port = self.connections[tab.id];
+        function harListener(message) {
+          if (message.responseHar) {
+            self.harLog = self.requestHook.fixHAR({
+              log: message.responseHar
+            });
+            self.requestHook.stop();
+            port.onMessage.removeListener(harListener);
+            showVideoPlaybackPage();
+          }
+        }
+        if (port) {
+          port.onMessage.addListener(harListener);
+          port.postMessage({requestHar: true});
+        }
+        else {
+          self.requestHook.stop();
+          alert('To take a HAR file, DevTools must have been opened');
+          showVideoPlaybackPage();
+        }
+      });
+    }
+    else {
+      showVideoPlaybackPage();
+    }
+  }
+
+  self.timer.stop(function() {
+    self.proxy.clear(function() {
+      self.tc.stop(doStop);
+    });
+  });
+};
 
 function IntervalTimer(proc, span) {
   this.proc = proc;
@@ -33,6 +200,7 @@ IntervalTimer.prototype.start = function() {
   var span = this.span;
   var start = Date.now();
   var time = 0;
+
   function instance() {
     var diff;
     time += span;
@@ -47,6 +215,7 @@ IntervalTimer.prototype.start = function() {
       self.timer = setTimeout(instance, (span - diff));
     }
   }
+
   self.timer = setTimeout(instance, span);
 };
 
@@ -73,30 +242,66 @@ IntervalTimer.prototype.setProcedure = function(proc) {
   this.proc = proc;
 };
 
+function Proxy() {
+}
+
+Proxy.prototype.set = function(options, callback) {
+  var httpProxy = options.httpProxy;
+  if (httpProxy) {
+    var parts = httpProxy.split(':');
+    var hostName = parts[0];
+    var port = parts.length >= 2 ? parseInt(parts[1], 10) : 80;
+    var proxyConfig = {
+      mode: "fixed_servers",
+      rules: {
+        proxyForHttp: {
+          scheme: "http",
+          host: hostName,
+          port: port
+        },
+        bypassList: ["localhost"]
+      }
+    };
+    chrome.proxy.settings.set({value: proxyConfig, scope: 'regular'}, callback);
+  }
+  else {
+    this.clear(callback);
+  }
+};
+
+Proxy.prototype.clear = function(callback) {
+  chrome.proxy.settings.clear({scope: 'regular'}, callback);
+};
+
 function RequestHook() {
+  var self = this;
   this.isHook = false;
   this.details = [];
   this.targetTabId = -1;
+
+  function register() {
+    chrome.webRequest.onBeforeRequest.addListener(function(details) {
+      if (details.tabId == -1) {
+        return;
+      }
+      if (details.tabId == self.targetTabId) {
+        if (self.isHook) {
+          self.details.push(details);
+        }
+      }
+    }, {urls: ["<all_urls>"]});
+  }
+
+  register();
 }
 
-RequestHook.prototype.startHook = function() {
+RequestHook.prototype.start = function() {
   this.isHook = true;
   this.details = [];
 };
 
-RequestHook.prototype.stopHook = function() {
+RequestHook.prototype.stop = function() {
   this.isHook = false;
-};
-
-RequestHook.prototype.onBeforeRequest = function(details) {
-  if (details.tabId == -1) {
-    return;
-  }
-  if (details.tabId == this.targetTabId) {
-    if (this.isHook) {
-      this.details.push(details);
-    }
-  }
 };
 
 RequestHook.prototype.fixHAR = function(har) {
@@ -136,134 +341,19 @@ RequestHook.prototype.fixHAR = function(har) {
         });
       }
     }
-
   }
   return har;
 };
 
-function startRecording(options) {
-  var i = 0;
-  isRecording = true;
-  server = options.server;
-  fps = parseInt(options.fps, 10);
-  losstime = parseInt(options.losstime, 10);
-  enableHar = options.enableHar;
-  album = options.album || '';
-  chrome.browserAction.setIcon({path: 'images/sc-rec.png'});
-  chrome.browserAction.setTitle({title: 'Stop recording.'});
-  images = [];
-
-  function load() {
-    onLoadListener = function(details) {
-      if (details.url.split('#')[0].indexOf(options.url.split('#')[0]) == 0) {
-        setTimeout(function() {
-          stopRecording();
-        }, losstime);
-      }
-    };
-    chrome.webNavigation.onCompleted.addListener(onLoadListener);
-    startDate = Date.now();
-    if (enableHar) {
-      requestHook.startHook();
-    }
-    chrome.tabs.update({
-      url: options.url
-    });
-    takePhoto(i, images);
-    timer = new IntervalTimer(function() {
-      takePhoto(++i, images);
-    }, 1000 / fps);
-    timer.start();
-  }
-  startTc(options, function() {
-    setProxy(options, function() {
-      if (options.initialUrl) {
-        onResolveLoadListener = function(details) {
-          if (options.initialUrl.split('#')[0] == details.url.split('#')[0]) {
-            chrome.webNavigation.onCompleted.removeListener(onResolveLoadListener);
-            setTimeout(function() {
-              load();
-            }, INITIAL_DELAY);
-          }
-        }
-        chrome.webNavigation.onCompleted.addListener(onResolveLoadListener);
-        chrome.tabs.update({
-          url: options.initialUrl
-        });
-      }
-      else {
-        load();
-      }
-    });
-  });
+function TrafficControl(server) {
+  this.server = server;
+  this.statusPath = '/api/tc/status';
+  this.startPath = '/api/tc/start/{{rate}}/{{delay}}';
+  this.stopPath = '/api/tc/stop';
 }
 
-function takePhoto(i, images, callback) {
-  chrome.browserAction.setBadgeText({text: '' + i});
-  chrome.tabs.captureVisibleTab(null, {quality: QUALITY}, function(img) {
-    img = img ? img : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    images.push({
-      index: i,
-      time: Date.now() - startDate,
-      data: img
-    });
-    if (callback) {
-      callback();
-    }
-  });
-}
-
-function stopRecording() {
-  isRecording = false;
-  function doStop() {
-    if (onLoadListener) {
-      chrome.webNavigation.onCompleted.removeListener(onLoadListener);
-      onLoadListener = null;
-    }
-    chrome.browserAction.setIcon({path: 'images/sc.png'});
-    chrome.browserAction.setTitle({title: 'Start recording.'});
-    if (enableHar) {
-      chrome.tabs.getSelected(null, function(tab) {
-        var port = connections[tab.id];
-        function harListener(message) {
-          if (message.responseHar) {
-            harLog = requestHook.fixHAR({
-              log: message.responseHar
-            });
-            requestHook.stopHook();
-            port.onMessage.removeListener(harListener);
-            showVideoPlaybackPage();
-          }
-        }
-        if (port) {
-          port.onMessage.addListener(harListener);
-          port.postMessage({requestHar: true});
-        }
-        else {
-          requestHook.stopHook();
-          alert('To take a HAR file, DevTools must have been opened');
-          showVideoPlaybackPage();
-        }
-      });
-    }
-    else {
-      showVideoPlaybackPage();
-    }
-  }
-  timer.stop(function() {
-    clearProxy(function () {
-      stopTc(doStop);
-    });
-  });
-}
-
-function showVideoPlaybackPage() {
-  var playbackUrl = chrome.extension.getURL('playback.html');
-  chrome.tabs.create({url: playbackUrl});
-}
-
-function getTcStatus(options, callback) {
-  var url = options.server + TC_STATUS_PATH;
+TrafficControl.prototype.getStatus = function(callback) {
+  var url = this.server + this.statusPath;
   var xhr = new XMLHttpRequest();
   xhr.open('GET', url, true);
   xhr.onload = function(e) {
@@ -275,12 +365,12 @@ function getTcStatus(options, callback) {
     }
   };
   xhr.send();
-}
+};
 
-function startTc(options, callback) {
+TrafficControl.prototype.start = function(options, callback) {
   var throttle = options.throttle;
   if (throttle && (throttle.rate || throttle.delay)) {
-    var url = server + TC_START_PATH.replace('{{rate}}', throttle.rate).replace('{{delay}}', throttle.delay);
+    var url = this.server + this.startPath.replace('{{rate}}', throttle.rate).replace('{{delay}}', throttle.delay);
     var xhr = new XMLHttpRequest();
     xhr.open('POST', url, true);
     xhr.onload = function(e) {
@@ -296,10 +386,10 @@ function startTc(options, callback) {
   else {
     stopTc(callback);
   }
-}
+};
 
-function stopTc(callback) {
-  var url = server + TC_STOP_PATH;
+TrafficControl.prototype.stop = function(callback) {
+  var url = this.server + this.stopPath;
   var xhr = new XMLHttpRequest();
   xhr.open('POST', url, true);
   xhr.onload = function(e) {
@@ -311,34 +401,11 @@ function stopTc(callback) {
     }
   };
   xhr.send();
-}
+};
 
-function setProxy(options, callback) {
-  var httpProxy = options.httpProxy;
-  if (httpProxy) {
-    var parts = httpProxy.split(':');
-    var hostName = parts[0];
-    var port = parts.length >= 2 ? parseInt(parts[1], 10) : 80;
-    var proxyConfig = {
-      mode: "fixed_servers",
-      rules: {
-        proxyForHttp: {
-          scheme: "http",
-          host: hostName,
-          port: port
-        },
-        bypassList: ["localhost"]
-      }
-    };
-    chrome.proxy.settings.set({value: proxyConfig, scope: 'regular'}, callback);
-  }
-  else {
-    clearProxy(callback);
-  }
-}
-
-function clearProxy(callback) {
-  chrome.proxy.settings.clear({scope: 'regular'}, callback);
+function showVideoPlaybackPage() {
+  var playbackUrl = chrome.extension.getURL('playback.html');
+  chrome.tabs.create({url: playbackUrl});
 }
 
 function toUTCString(date) {
@@ -374,45 +441,3 @@ function clone(obj) {
   }
   return temp;
 }
-
-// Handle messages from popup window
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request.toggleRecord) {
-    if (isRecording) {
-      stopRecording();
-    }
-    else {
-      startRecording(request.toggleRecord);
-    }
-    sendResponse({isRecording: isRecording});
-  }
-  else if (request.targetTabId) {
-    requestHook.targetTabId = request.targetTabId;
-    sendResponse(null);
-  }
-});
-
-// Handle connections to Devtools
-chrome.runtime.onConnect.addListener(function(port) {
-  if (port.name == 'sitrec') {
-    var extensionListener = function(message, sender, sendResponse) {
-      if (message.name == 'init') {
-        connections[message.tabId] = port;
-        return;
-      }
-    }
-    port.onMessage.addListener(extensionListener);
-    port.onDisconnect.addListener(function(port) {
-      port.onMessage.removeListener(extensionListener);
-      var tabs = Object.keys(connections);
-      for (var i = 0, len = tabs.length; i < len; i++) {
-        if (connections[tabs[i]] == port) {
-          delete connections[tabs[i]]
-          break;
-        }
-      }
-    });
-  }
-});
-
-chrome.webRequest.onBeforeRequest.addListener(requestHook.onBeforeRequest.bind(requestHook), {urls: ["<all_urls>"]});

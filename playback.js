@@ -1,20 +1,18 @@
-function $(id) { return document.querySelector(id); }
+function $(id) {
+  return document.querySelector(id);
+}
 
 var background = chrome.extension.getBackgroundPage();
 var IntervalTimer = background.IntervalTimer;
-var images = background.images;
-var harLog = background.harLog;
-var albumPrefix = background.album;
-var startDate = background.startDate;
-var server = background.server;
-var startDateFormatted = formatDate(new Date(startDate));
+var recorder = background.recorder;
+var startDateFormatted = formatDate(new Date(recorder.startDate));
 var currentIndex = 0;
 var $image;
 var $slider;
 var $playpause;
 var $still;
 var $seekTime;
-var timer = new IntervalTimer(null, 1000 / background.fps);
+var timer = new IntervalTimer(null, 1000 / recorder.fps);
 
 document.addEventListener('DOMContentLoaded', function() {
   $image = $('#image');
@@ -24,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
   $seekTime = $('#seekTime');
 
   $slider.setAttribute('min', 0);
-  $slider.setAttribute('max', images.length - 1);
+  $slider.setAttribute('max', recorder.images.length - 1);
   $slider.setAttribute('step', 1);
 
   $slider.addEventListener('change', function(event) {
@@ -91,14 +89,14 @@ function play() {
   $playpause.className = 'pause';
 
   // If already at the end, restart
-  if (currentIndex == images.length - 1) {
+  if (currentIndex == recorder.images.length - 1) {
     setIndex(0);
     updateSliderPosition();
   }
 
   // Load images and render them in sequence
   timer.setProcedure(function() {
-    if (currentIndex >= images.length - 1) {
+    if (currentIndex >= recorder.images.length - 1) {
       pause();
       return;
     }
@@ -114,20 +112,20 @@ function pause() {
 }
 
 function setIndex(index) {
-  if (index >= images.length) {
+  if (index >= recorder.images.length) {
     console.error('Index out of bounds');
     return;
   }
   currentIndex = index;
   // TODO: validate index
-  $image.src = images[index].data;
-  $seekTime.textContent = '' + (index * 1000 / background.fps);
+  $image.src = recorder.images[index].data;
+  $seekTime.textContent = '' + (index * 1000 / recorder.fps);
 }
 
 function uploadAll() {
   setState('upload');
   setProgress(0);
-  getOrCreateAlbum(server, albumPrefix + '-' + startDateFormatted, function(album) {
+  getOrCreateAlbum(recorder.server, recorder.album + '-' + startDateFormatted, function(album) {
     uploadNext(album, 0);
   });
 }
@@ -137,24 +135,24 @@ function uploadNext(album, i) {
   var photoName;
   var dataUri;
 
-  if (i < images.length) {
+  if (i < recorder.images.length) {
     setIndex(i);
     updateSliderPosition({ignoreState: true});
 
-    image = images[i];
-    photoName = '' + (image.index * (1000 / background.fps));
+    image = recorder.images[i];
+    photoName = '' + (image.index * (1000 / recorder.fps));
     dataUri = image.data;
 
-    uploadPhoto(server, album.name, photoName, dataUri, function(data) {
-      setProgress(((i + 1) / images.length) * 100);
+    uploadPhoto(recorder.server, album.name, photoName, dataUri, function(data) {
+      setProgress(((i + 1) / recorder.images.length) * 100);
       uploadNext(album, i + 1);
     }, function(loaded, total) {
-      setProgress(((i + loaded / total) / images.length) * 100);
+      setProgress(((i + loaded / total) / recorder.images.length) * 100);
     });
   }
   else {
-    if (harLog) {
-      uploadHar(server, album.name, harLog, function() {
+    if (recorder.harLog) {
+      uploadHar(recorder.server, album.name, recorder.harLog, function() {
         setSharedInfo(album.name, 'All images and HAR have been uploaded.');
         setState('shared');
       });
