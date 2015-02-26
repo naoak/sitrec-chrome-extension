@@ -161,7 +161,7 @@ Recorder.prototype.stop = function() {
             });
             self.requestHook.stop();
             port.onMessage.removeListener(harListener);
-            showVideoPlaybackPage();
+            self.showVideoPlaybackPage();
           }
         }
         if (port) {
@@ -171,12 +171,12 @@ Recorder.prototype.stop = function() {
         else {
           self.requestHook.stop();
           alert('To take a HAR file, DevTools must have been opened');
-          showVideoPlaybackPage();
+          self.showVideoPlaybackPage();
         }
       });
     }
     else {
-      showVideoPlaybackPage();
+      self.showVideoPlaybackPage();
     }
   }
 
@@ -185,6 +185,20 @@ Recorder.prototype.stop = function() {
       self.tc.stop(doStop);
     });
   });
+};
+
+Recorder.prototype.showVideoPlaybackPage = function() {
+  var throttle = this.options.throttle;
+  var albumName = this.album;
+
+  if (throttle) {
+    albumName += '-' + throttle.rate.replace('mbit', 'M').replace('kbit', 'K') + throttle.delay;
+  }
+  albumName += '-' + formatDate(new Date(this.startDate));
+  this.fullAlbumName = albumName;
+
+  var playbackUrl = chrome.extension.getURL('playback.html');
+  chrome.tabs.create({url: playbackUrl});
 };
 
 function IntervalTimer(proc, span) {
@@ -403,11 +417,6 @@ TrafficControl.prototype.stop = function(callback) {
   xhr.send();
 };
 
-function showVideoPlaybackPage() {
-  var playbackUrl = chrome.extension.getURL('playback.html');
-  chrome.tabs.create({url: playbackUrl});
-}
-
 function toUTCString(date) {
   function padZero(digits, num) {
     var result;
@@ -426,6 +435,27 @@ function toUTCString(date) {
   var ss = padZero(date.getUTCSeconds(), 2);
   var SS = padZero(date.getUTCMilliseconds(), 4);
   return yy + '-' + MM + '-' + dd + 'T' + hh + ':' + mm + ':' + ss + '.' + SS + 'Z';
+}
+
+function formatDate(date) {
+  var yy = date.getFullYear();
+  var mm = date.getMonth() + 1;
+  var dd = date.getDate();
+  var hh = date.getHours();
+  var MM = date.getMinutes();
+  if (mm < 10) {
+    mm = '0' + mm;
+  }
+  if (dd < 10) {
+    dd = '0' + dd;
+  }
+  if (hh < 10) {
+    hh = '0' + hh;
+  }
+  if (MM < 10) {
+    MM = '0' + MM;
+  }
+  return yy + '-' + mm + dd + '-' + hh + MM;
 }
 
 function clone(obj) {

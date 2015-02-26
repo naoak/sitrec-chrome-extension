@@ -131,7 +131,8 @@ progress { width: 100% }
 #bottom .playback { display: block; }
 
 #bottom .shared { padding: 15px; padding-bottom: 0; }
-#bottom .shared .view { text-align: right; }
+#bottom .shared .view { text-align: right; font-size: 14px; }
+#bottom .shared .view .link > a { color: #ccc; }
 #bottom .shared .copy { font-size: 12px; font-weight: normal; }
 #bottom .shared .message { float: left; }
 

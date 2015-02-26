@@ -5,7 +5,7 @@ function $(id) {
 var background = chrome.extension.getBackgroundPage();
 var IntervalTimer = background.IntervalTimer;
 var recorder = background.recorder;
-var startDateFormatted = formatDate(new Date(recorder.startDate));
+var throttle = recorder.options.throttle;
 var currentIndex = 0;
 var $image;
 var $slider;
@@ -47,28 +47,6 @@ document.addEventListener('DOMContentLoaded', function() {
   setIndex(currentIndex);
   uploadAll();
 });
-
-function formatDate(date) {
-  var yy = date.getFullYear();
-  var mm = date.getMonth() + 1;
-  var dd = date.getDate();
-  var hh = date.getHours();
-  var MM = date.getMinutes();
-
-  if (mm < 10) {
-    mm = '0' + mm;
-  }
-  if (dd < 10) {
-    dd = '0' + dd;
-  }
-  if (hh < 10) {
-    hh = '0' + hh;
-  }
-  if (MM < 10) {
-    MM = '0' + MM;
-  }
-  return yy + '-' + mm + dd + '-' + hh + MM;
-}
 
 function updateSliderPosition(options) {
   if (!options || !options.ignoreState) {
@@ -125,7 +103,8 @@ function setIndex(index) {
 function uploadAll() {
   setState('upload');
   setProgress(0);
-  getOrCreateAlbum(recorder.server, recorder.album + '-' + startDateFormatted, function(album) {
+
+  getOrCreateAlbum(recorder.server, recorder.fullAlbumName, function(album) {
     uploadNext(album, 0);
   });
 }
@@ -153,7 +132,7 @@ function uploadNext(album, i) {
   else {
     if (recorder.harLog) {
       uploadHar(recorder.server, album.name, recorder.harLog, function() {
-        setSharedInfo(album.name, 'All images and HAR have been uploaded.');
+        setSharedInfo(album.name, 'All images and a HAR file have been uploaded.');
         setState('shared');
       });
     }
@@ -186,17 +165,13 @@ function setProgress(percent) {
  * @param {String} message (optional) message to the user
  * @param {Object} editUrl (optional) URL to edit the uploaded asset
  */
-function setSharedInfo(url, message, editUrl) {
+function setSharedInfo(url, message) {
   var link = $('#bottom .shared .link');
-  link.innerText = url;
+  link.innerHTML = '<a href="' + recorder.server + '" target="_blank">' + url + '</a>';
 
   // If message specified, set it
   if (message) {
     $('#bottom .shared .message').innerText = message;
-  }
-
-  // If editUrl specified, make sure user can click it
-  if (editUrl) {
   }
 
   // Lastly, select the URL
