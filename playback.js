@@ -10,7 +10,7 @@ var currentIndex = 0;
 var $image;
 var $slider;
 var $playpause;
-var $still;
+var $upload;
 var $seekTime;
 var timer = new IntervalTimer(null, 1000 / recorder.fps);
 
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
   $image = $('#image');
   $slider = $('#slider');
   $playpause = $('#playpause');
-  $still = $('#still');
+  $upload = $('#upload');
   $seekTime = $('#seekTime');
 
   $slider.setAttribute('min', 0);
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     playpause();
   });
 
-  $still.addEventListener('click', function(event) {
+  $upload.addEventListener('click', function(event) {
     uploadAll();
   });
 
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   setIndex(currentIndex);
-  setState('playback');
+  uploadAll();
 });
 
 function formatDate(date) {
