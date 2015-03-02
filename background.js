@@ -89,7 +89,7 @@ Recorder.prototype.start = function(options) {
     chrome.webNavigation.onCompleted.addListener(self.onLoadListener);
     self.startDate = Date.now();
     if (self.options.enableHar) {
-      self.requestHook.start();
+      self.requestHook.start(options);
     }
     chrome.tabs.update({
       url: options.url
@@ -309,7 +309,8 @@ function RequestHook() {
   register();
 }
 
-RequestHook.prototype.start = function() {
+RequestHook.prototype.start = function(options) {
+  this.options = options;
   this.isHook = true;
   this.details = [];
 };
@@ -326,14 +327,17 @@ RequestHook.prototype.fixHAR = function(har) {
       details = details.filter(function(d) {
         return d.url.indexOf('favicon.ico') === -1;
       });
+
       // Set page start time
       if (har.log.pages.length === 1 && details.length > 0) {
         har.log.pages[0].startedDateTime = toUTCString(new Date(details[0].timeStamp));
       }
+
       // Remove inline data entry
       har.log.entries = har.log.entries.filter(function(entry) {
         return entry.request.url.indexOf('data:') === -1;
       });
+
       // Set entry start time
       har.log.entries = har.log.entries.map(function(entry) {
         if (typeof entry.startedDateTime === 'object' && Object.keys(entry.startedDateTime).length === 0) {
@@ -348,6 +352,10 @@ RequestHook.prototype.fixHAR = function(har) {
         }
         return entry;
       });
+
+      // Insert page comment about recorder options
+      har.log.pages[0].comment = JSON.stringify(this.options);
+
       if (details.length > 0) {
         alert(details.length + " request entries remain not to match");
         details.forEach(function(d) {
