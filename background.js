@@ -406,7 +406,7 @@ TrafficControl.prototype.start = function(options, callback) {
     xhr.send();
   }
   else {
-    stopTc(callback);
+    self.stop(callback);
   }
 };
 
