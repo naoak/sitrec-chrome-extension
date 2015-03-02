@@ -354,7 +354,9 @@ RequestHook.prototype.fixHAR = function(har) {
       });
 
       // Insert page comment about recorder options
-      har.log.pages[0].comment = JSON.stringify(this.options);
+      har.log.pages[0].comment = JSON.stringify({
+        options: this.options
+      });
 
       if (details.length > 0) {
         alert(details.length + " request entries remain not to match");
