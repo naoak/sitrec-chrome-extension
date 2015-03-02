@@ -192,7 +192,7 @@ Recorder.prototype.showVideoPlaybackPage = function() {
   var albumName = this.album;
 
   if (throttle) {
-    albumName += '-' + throttle.rate.replace('mbit', 'M').replace('kbit', 'K') + throttle.delay;
+    albumName += '-' + throttle.rate + throttle.delay;
   }
   albumName += '-' + formatDate(new Date(this.startDate));
   this.fullAlbumName = albumName;
