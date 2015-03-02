@@ -10,7 +10,7 @@ var currentIndex = 0;
 var $image;
 var $slider;
 var $playpause;
-var $upload;
+var $albumList;
 var $seekTime;
 var timer = new IntervalTimer(null, 1000 / recorder.fps);
 
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
   $image = $('#image');
   $slider = $('#slider');
   $playpause = $('#playpause');
-  $upload = $('#upload');
+  $albumList = $('#albumList');
   $seekTime = $('#seekTime');
 
   $slider.setAttribute('min', 0);
@@ -34,8 +34,8 @@ document.addEventListener('DOMContentLoaded', function() {
     playpause();
   });
 
-  $upload.addEventListener('click', function(event) {
-    uploadAll();
+  $albumList.addEventListener('click', function(event) {
+    window.open(recorder.server, '_blank');
   });
 
   document.addEventListener('keydown', function(event) {
@@ -45,7 +45,10 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   setIndex(currentIndex);
-  uploadAll();
+
+  if (window.location.hash == '#upload') {
+    uploadAll();
+  }
 });
 
 function updateSliderPosition(options) {
@@ -161,13 +164,13 @@ function setProgress(percent) {
 }
 
 /**
- * @param {String} url the URL that was shared
+ * @param {String} albumName the album name
  * @param {String} message (optional) message to the user
  * @param {Object} editUrl (optional) URL to edit the uploaded asset
  */
-function setSharedInfo(url, message) {
+function setSharedInfo(albumName, message) {
   var link = $('#bottom .shared .link');
-  link.innerHTML = '<a href="' + recorder.server + '" target="_blank">' + url + '</a>';
+  link.innerHTML = '<a href="' + recorder.server + '/album/' + albumName + '" target="_blank">' + albumName + '</a>';
 
   // If message specified, set it
   if (message) {

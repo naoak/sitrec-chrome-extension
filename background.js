@@ -161,7 +161,9 @@ Recorder.prototype.stop = function() {
             });
             self.requestHook.stop();
             port.onMessage.removeListener(harListener);
-            self.showVideoPlaybackPage();
+            self.showVideoPlaybackPage({
+              hash: 'upload'
+            });
           }
         }
         if (port) {
@@ -187,7 +189,7 @@ Recorder.prototype.stop = function() {
   });
 };
 
-Recorder.prototype.showVideoPlaybackPage = function() {
+Recorder.prototype.showVideoPlaybackPage = function(playbackOptions) {
   var throttle = this.options.throttle;
   var albumName = this.album;
 
@@ -197,7 +199,10 @@ Recorder.prototype.showVideoPlaybackPage = function() {
   albumName += '-' + formatDate(new Date(this.startDate));
   this.fullAlbumName = albumName;
 
-  var playbackUrl = chrome.extension.getURL('playback.html');
+  var playbackUrl = 'playback.html';
+  playbackUrl += (playbackOptions && playbackOptions.hash) ? '#' + playbackOptions.hash : '';
+  playbackUrl = chrome.extension.getURL(playbackUrl);
+
   chrome.tabs.create({url: playbackUrl});
 };
 

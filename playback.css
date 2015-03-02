@@ -116,8 +116,7 @@ button:hover {
 
 #playpause.play { background-image: url(images/play.png); }
 #playpause.pause { background-image: url(images/pause.png); }
-#upload { background-image: url(images/upload.png); }
-#video { background-image: url(images/video.png); }
+#albumList { display: blocak; background-image: url(images/album-list.png); }
 
 progress { width: 100% }
 
