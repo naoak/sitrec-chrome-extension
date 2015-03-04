@@ -327,6 +327,11 @@ RequestHook.prototype.stop = function() {
 };
 
 RequestHook.prototype.fixHAR = function(har) {
+
+  function isEmptyObject(obj) {
+    return typeof obj === 'object' && Object.keys(obj).length === 0;
+  }
+
   if (this.isHook) {
     var details = clone(this.details);
     if (har.log) {
@@ -340,14 +345,14 @@ RequestHook.prototype.fixHAR = function(har) {
         har.log.pages[0].startedDateTime = toUTCString(new Date(details[0].timeStamp));
       }
 
-      // Remove inline data entry
+      // Remove inline data entries
       har.log.entries = har.log.entries.filter(function(entry) {
         return entry.request.url.indexOf('data:') === -1;
       });
 
-      // Set entry start time
+      // Set each entry start time
       har.log.entries = har.log.entries.map(function(entry) {
-        if (typeof entry.startedDateTime === 'object' && Object.keys(entry.startedDateTime).length === 0) {
+        if (isEmptyObject(entry.startedDateTime)) {
           for (var i = 0; i < details.length; i++) {
             var d = details[i];
             if (d.url == entry.request.url) {
@@ -358,6 +363,11 @@ RequestHook.prototype.fixHAR = function(har) {
           }
         }
         return entry;
+      });
+
+      // Remove empty entries which are generated when the request entries hit the cache
+      har.log.entries = har.log.entries.filter(function(entry) {
+        return !isEmptyObject(entry.startedDateTime);
       });
 
       // Insert page comment about recorder options
