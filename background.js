@@ -64,11 +64,13 @@ function Recorder() {
 Recorder.prototype.start = function(options) {
   var self = this;
   var index = 0;
+  var server = options.server;
 
-  options.server = (options.server.lastIndexOf('/') === options.server.length - 1) ? options.server.slice(0, options.length - 1) : options.server;
+  server = (server.lastIndexOf('/') === server.length - 1) ? server.slice(0, server.length - 1) : server;
+  options.server = server;
   self.isRecording = true;
   self.options = options;
-  self.server = options.server;
+  self.server = server;
   self.fps = parseInt(options.fps, 10);
   self.losstime = parseInt(options.losstime, 10);
   self.album = options.album || '';
