@@ -1,6 +1,6 @@
 {
   "name": "sitrec-chrome-extension",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "manifest_version": 2,
   "description": "Capture screenshots on a chrome tab during loading a site, and then save a HAR file after loaded.",
   "devtools_page": "devtools.html",
