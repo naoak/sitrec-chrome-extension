@@ -10,7 +10,7 @@ var currentIndex = 0;
 var $image;
 var $slider;
 var $playpause;
-var $albumList;
+var $recordList;
 var $seekTime;
 var timer = new IntervalTimer(null, 1000 / recorder.fps);
 
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
   $image = $('#image');
   $slider = $('#slider');
   $playpause = $('#playpause');
-  $albumList = $('#albumList');
+  $recordList = $('#recordList');
   $seekTime = $('#seekTime');
 
   $slider.setAttribute('min', 0);
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     playpause();
   });
 
-  $albumList.addEventListener('click', function(event) {
+  $recordList.addEventListener('click', function(event) {
     window.open(recorder.server, '_blank');
   });
 
@@ -107,12 +107,12 @@ function uploadAll() {
   setState('upload');
   setProgress(0);
 
-  getOrCreateAlbum(recorder.server, recorder.fullAlbumName, function(album) {
-    uploadNext(album, 0);
+  getOrCreateRecord(recorder.server, recorder.fullRecordName, function(record) {
+    uploadNext(record, 0);
   });
 }
 
-function uploadNext(album, i) {
+function uploadNext(record, i) {
   var image;
   var photoName;
   var dataUri;
@@ -125,22 +125,22 @@ function uploadNext(album, i) {
     photoName = '' + (image.index * (1000 / recorder.fps));
     dataUri = image.data;
 
-    uploadPhoto(recorder.server, album.name, photoName, dataUri, function(data) {
+    uploadPhoto(recorder.server, record.name, photoName, dataUri, function(data) {
       setProgress(((i + 1) / recorder.images.length) * 100);
-      uploadNext(album, i + 1);
+      uploadNext(record, i + 1);
     }, function(loaded, total) {
       setProgress(((i + loaded / total) / recorder.images.length) * 100);
     });
   }
   else {
     if (recorder.harLog) {
-      uploadHar(recorder.server, album.name, recorder.harLog, function() {
-        setSharedInfo(album.name, 'All images and a HAR file have been uploaded.');
+      uploadHar(recorder.server, record.name, recorder.harLog, function() {
+        setSharedInfo(record.name, 'All images and a HAR file have been uploaded.');
         setState('shared');
       });
     }
     else {
-      setSharedInfo(album.name, 'All images have been uploaded.');
+      setSharedInfo(record.name, 'All images have been uploaded.');
       setState('shared');
     }
   }
@@ -164,13 +164,12 @@ function setProgress(percent) {
 }
 
 /**
- * @param {String} albumName the album name
+ * @param {String} recordName the record name
  * @param {String} message (optional) message to the user
- * @param {Object} editUrl (optional) URL to edit the uploaded asset
  */
-function setSharedInfo(albumName, message) {
+function setSharedInfo(recordName, message) {
   var link = $('#bottom .shared .link');
-  link.innerHTML = '<a href="' + recorder.server + '/album/' + albumName + '" target="_blank">' + albumName + '</a>';
+  link.innerHTML = '<a href="' + recorder.server + '/album/' + recordName + '" target="_blank">' + recordName + '</a>';
 
   // If message specified, set it
   if (message) {
@@ -190,4 +189,3 @@ function selectElementContents(element) {
   sel.removeAllRanges();
   sel.addRange(range);
 }
-

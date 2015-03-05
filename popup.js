@@ -5,7 +5,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 
 document.addEventListener('DOMContentLoaded', function() {
   var inputInfos = [
-    {name: 'album', default: ''},
+    {name: 'recordName', default: ''},
     {name: 'server', default: 'http://localhost:11080'},
     {name: 'httpProxy', default: 'localhost:11001'},
     {name: 'initialUrl', default: 'http://www.example.com/empty'},

@@ -73,7 +73,7 @@ Recorder.prototype.start = function(options) {
   self.server = server;
   self.fps = parseInt(options.fps, 10);
   self.losstime = parseInt(options.losstime, 10);
-  self.album = options.album || '';
+  self.recordName = options.recordName || '';
   self.tc = new TrafficControl(options.server);
   self.images = [];
 
@@ -193,13 +193,13 @@ Recorder.prototype.stop = function() {
 
 Recorder.prototype.showVideoPlaybackPage = function(playbackOptions) {
   var throttle = this.options.throttle;
-  var albumName = this.album;
+  var recordName = this.recordName;
 
   if (throttle) {
-    albumName += '-' + throttle.rate + throttle.delay;
+    recordName += '-' + throttle.rate + throttle.delay;
   }
-  albumName += '-' + formatDate(new Date(this.startDate));
-  this.fullAlbumName = albumName;
+  recordName += '-' + formatDate(new Date(this.startDate));
+  this.fullRecordName = recordName;
 
   var playbackUrl = 'playback.html';
   playbackUrl += (playbackOptions && playbackOptions.hash) ? '#' + playbackOptions.hash : '';

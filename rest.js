@@ -1,24 +1,24 @@
-var CREATE_ALBUM_PATH = '/api/album/create';
-var LIST_ALBUM_PATH = '/api/album/list';
-var CREATE_PHOTO_PATH = '/api/photo/create/{{albumName}}/{{photoName}}';
-var CREATE_HAR_PATH = '/api/har/create/{{albumName}}';
+var CREATE_RECORD_PATH = '/api/album/create';
+var LIST_RECORD_PATH = '/api/album/list';
+var CREATE_PHOTO_PATH = '/api/photo/create/{{recordName}}/{{photoName}}';
+var CREATE_HAR_PATH = '/api/har/create/{{recordName}}';
 
-function getOrCreateAlbum(server, albumName, callback) {
-  getAlbum(server, albumName, function(album) {
-    if (album) {
-      callback(album);
+function getOrCreateRecord(server, recordName, callback) {
+  getRecord(server, recordName, function(record) {
+    if (record) {
+      callback(record);
     }
     else {
-      createAlbum(server, albumName, function(album) {
-        callback(album);
+      createRecord(server, recordName, function(record) {
+        callback(record);
       });
     }
   });
 }
 
-function createAlbum(server, albumName, callback) {
+function createRecord(server, recordName, callback) {
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', server + CREATE_ALBUM_PATH, true);
+  xhr.open('POST', server + CREATE_RECORD_PATH, true);
   xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
   xhr.onload = function(e) {
     if (this.status == 200) {
@@ -28,20 +28,20 @@ function createAlbum(server, albumName, callback) {
       }
     }
   };
-  xhr.send(JSON.stringify({name: '' + albumName}));
+  xhr.send(JSON.stringify({name: '' + recordName}));
 }
 
-function getAlbum(server, albumName, callback) {
+function getRecord(server, recordName, callback) {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', server + LIST_ALBUM_PATH, true);
+  xhr.open('GET', server + LIST_RECORD_PATH, true);
   xhr.onload = function(e) {
     if (this.status == 200) {
       var data = JSON.parse(xhr.responseText);
-      var albums = data.items;
-      for (var i = 0; i < albums.length; i++) {
-        var album = albums[i];
-        if (album.name == albumName) {
-          callback(album);
+      var records = data.items;
+      for (var i = 0; i < records.length; i++) {
+        var record = records[i];
+        if (record.name == recordName) {
+          callback(record);
           return;
         }
       }
@@ -51,8 +51,8 @@ function getAlbum(server, albumName, callback) {
   xhr.send();
 }
 
-function uploadPhoto(server, albumName, photoName, dataURI, callback, progressCallback) {
-  var url = server + CREATE_PHOTO_PATH.replace('{{albumName}}', albumName).replace('{{photoName}}', photoName);
+function uploadPhoto(server, recordName, photoName, dataURI, callback, progressCallback) {
+  var url = server + CREATE_PHOTO_PATH.replace('{{recordName}}', recordName).replace('{{photoName}}', photoName);
   var xhr = new XMLHttpRequest();
   xhr.open('POST', url, true);
   xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
@@ -75,8 +75,8 @@ function uploadPhoto(server, albumName, photoName, dataURI, callback, progressCa
   }));
 }
 
-function uploadHar(server, albumName, harLog, callback) {
-  var url = server + CREATE_HAR_PATH.replace('{{albumName}}', albumName);
+function uploadHar(server, recordName, harLog, callback) {
+  var url = server + CREATE_HAR_PATH.replace('{{recordName}}', recordName);
   var xhr = new XMLHttpRequest();
   xhr.open('POST', url, true);
   xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
