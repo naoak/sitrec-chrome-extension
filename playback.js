@@ -169,7 +169,7 @@ function setProgress(percent) {
  */
 function setSharedInfo(recordName, message) {
   var link = $('#bottom .shared .link');
-  link.innerHTML = '<a href="' + recorder.server + '/album/' + recordName + '" target="_blank">' + recordName + '</a>';
+  link.innerHTML = '<a href="' + recorder.server + '/record/' + recordName + '" target="_blank">' + recordName + '</a>';
 
   // If message specified, set it
   if (message) {

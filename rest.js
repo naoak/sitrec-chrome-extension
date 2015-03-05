@@ -1,5 +1,5 @@
-var CREATE_RECORD_PATH = '/api/album/create';
-var LIST_RECORD_PATH = '/api/album/list';
+var CREATE_RECORD_PATH = '/api/record/create';
+var LIST_RECORD_PATH = '/api/record/list';
 var CREATE_PHOTO_PATH = '/api/photo/create/{{recordName}}/{{photoName}}';
 var CREATE_HAR_PATH = '/api/har/create/{{recordName}}';
 
