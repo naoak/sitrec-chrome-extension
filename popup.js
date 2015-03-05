@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
   var viewBtn = document.getElementById('view');
   var recordBtn = document.getElementById('toggleRecord');
 
+  chrome.browserAction.setBadgeText({text: ''});
+
   chrome.storage.sync.get(inputNames, function(items) {
     inputNames.forEach(function(key, i) {
       inputs[key].value = items[key] || inputDefaults[i];
