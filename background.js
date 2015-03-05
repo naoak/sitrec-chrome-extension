@@ -340,6 +340,11 @@ RequestHook.prototype.fixHAR = function(har) {
         return d.url.indexOf('favicon.ico') === -1;
       });
 
+      // Insert page comment about recorder options
+      har.log.pages[0].comment = JSON.stringify({
+        options: this.options
+      });
+
       // Set page start time
       if (har.log.pages.length === 1 && details.length > 0) {
         har.log.pages[0].startedDateTime = toUTCString(new Date(details[0].timeStamp));
@@ -357,6 +362,9 @@ RequestHook.prototype.fixHAR = function(har) {
             var d = details[i];
             if (d.url == entry.request.url) {
               entry.startedDateTime = toUTCString(new Date(d.timeStamp));
+              entry.comment = JSON.stringify({
+                timeStamp: d.timeStamp
+              });
               details.splice(i, 1);
               break;
             }
@@ -370,9 +378,9 @@ RequestHook.prototype.fixHAR = function(har) {
         return !isEmptyObject(entry.startedDateTime);
       });
 
-      // Insert page comment about recorder options
-      har.log.pages[0].comment = JSON.stringify({
-        options: this.options
+      // Sort entries by request time stamps
+      har.log.entries.sort(function(a, b) {
+        return JSON.parse(a.comment).timeStamp - JSON.parse(b.comment).timeStamp;
       });
 
       if (details.length > 0) {
@@ -460,7 +468,7 @@ function toUTCString(date) {
   var hh = padZero(date.getUTCHours(), 2);
   var mm = padZero(date.getUTCMinutes(), 2);
   var ss = padZero(date.getUTCSeconds(), 2);
-  var SS = padZero(date.getUTCMilliseconds(), 4);
+  var SS = padZero(date.getUTCMilliseconds(), 3);
   return yy + '-' + MM + '-' + dd + 'T' + hh + ':' + mm + ':' + ss + '.' + SS + 'Z';
 }
 
