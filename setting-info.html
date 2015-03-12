@@ -1,0 +1,99 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/core-label/core-label.html">
+<link rel="import" href="bower_components/core-menu/core-menu.html">
+<link rel="import" href="bower_components/paper-input/paper-input.html">
+<link rel="import" href="bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="bower_components/paper-dropdown/paper-dropdown.html">
+<link rel="import" href="bower_components/paper-item/paper-item.html">
+
+<polymer-element name="setting-info">
+  <template>
+    <style>
+    :host {
+      display: block;
+      width: 100%;
+    }
+    :host form {
+      margin: 20px;
+      padding: 0;
+    }
+    :host form fieldset {
+      margin: 20px;
+      padding: 0;
+      border: none;
+    }
+    :host form core-label {
+      width: 100px;
+    }
+    :host /deep/ paper-dropdown-menu {
+      box-sizing: border-box;
+      width: 200px;
+    }
+    :host /deep/ core-menu {
+      box-sizing: border-box;
+      width: 200px;
+    }
+    :host paper-item {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    :host .unit {
+      margin-left: 5px;
+    }
+    </style>
+    <form layout vertical left>
+      <fieldset class="basic-fields">
+        <div layout horizontal center>
+          <core-label>Record Name</core-label>
+          <paper-input label="Record Name" flex></paper-input>
+        </div>
+        <div layout horizontal center>
+          <core-label>Initial URL</core-label>
+          <paper-input label="Initial URL" flex></paper-input>
+        </div>
+        <div layout horizontal center>
+          <core-label>URL</core-label>
+          <paper-input label="URL" flex></paper-input>
+        </div>
+      </fieldset>
+      <fieldset class="server-fields">
+        <div layout horizontal center>
+          <core-label>Server</core-label>
+          <paper-input label="Server" flex></paper-input>
+        </div>
+        <div layout horizontal center>
+          <core-label>HTTP Proxy</core-label>
+          <paper-input label="HTTP Proxy" flex></paper-input>
+        </div>
+      </fieldset>
+      <fieldset class="recorder-option-fields">
+        <div layout horizontal center>
+          <core-label>Throttle</core-label>
+          <paper-dropdown-menu label="Throttle" flex>
+            <paper-dropdown class="dropdown">
+              <core-menu class="menu">
+                <paper-item>No Restriction</paper-item>
+                <paper-item>20MB 200ms</paper-item>
+              </core-menu>
+            </paper-dropdown>
+          </paper-dropdown-menu>
+        </div>
+        <div layout horizontal center>
+          <core-label>Loss Time</core-label>
+          <paper-input label="Loss Time" style="width: 6em;"></paper-input>
+          <span class="unit">ms</span>
+        </div>
+        <div layout horizontal center>
+          <core-label>FPS</core-label>
+          <paper-input label="FPS" style="width: 3em;"></paper-input>
+          <span class="unit">f/s</span>
+        </div>
+      </fieldset>
+    </form>
+  </template>
+  <script>
+  Polymer({
+  });
+  </script>
+</polymer-element>

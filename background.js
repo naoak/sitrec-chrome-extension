@@ -506,3 +506,16 @@ function clone(obj) {
   }
   return temp;
 }
+
+chrome.browserAction.onClicked.addListener(function(tab) {
+  chrome.tabs.create({
+    url: chrome.extension.getURL('vulcanized.html'),
+    active: false
+  }, function(tab) {
+    chrome.windows.create({
+        tabId: tab.id,
+        type: 'popup',
+        focused: true
+    });
+  });
+});

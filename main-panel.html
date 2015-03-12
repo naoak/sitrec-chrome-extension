@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>Sitrec</title>
+    <script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
+    <link rel="import" href="bower_components/core-localstorage/core-localstorage.html">
+    <link rel="import" href="bower_components/core-header-panel/core-header-panel.html">
+    <link rel="import" href="bower_components/core-toolbar/core-toolbar.html">
+    <link rel="import" href="bower_components/core-pages/core-pages.html">
+    <link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
+    <link rel="import" href="record-page.html">
+    <style>
+    html,body {
+      height: 100%;
+      margin: 0;
+      background-color: #E5E5E5;
+      font-family: 'RobotoDraft', sans-serif;
+    }
+    core-header-panel {
+      height: 100%;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    core-toolbar {
+      background: #03a9f4;
+      color: white;
+    }
+    #tabs {
+      width: 100%;
+      margin: 0;
+      user-select: none;
+      text-transform: uppercase;
+    }
+    @media (min-width: 481px) {
+      #tabs {
+        width: 200px;
+      }
+    }
+    </style>
+  </head>
+  <body unresolved>
+    <!--
+      <core-localstorage name="httpProxy" value="{{httpProxy}}"></core-localstorage>
+    -->
+
+    <!--
+    <x-test1><x-test1>
+
+    <polymer-element name="x-test1" noscript>
+      <template>
+        string entered below will be stored in localStorage and automatically retrived from localStorage when the page is reloaded<br>
+        <input value="{{value}}">
+        <core-localstorage name="httyProxy" value="{{value}}"></core-localstorage>
+      </template>
+    </polymer-element>
+    -->
+
+    <template is="auto-binding">
+      <chrome-storage name="httpProxy" value="{{httpProxy}}"></chrome-storage>
+      <core-header-panel>
+        <core-toolbar>
+          <paper-tabs id="tabs" selected="record" self-end>
+            <paper-tab name="record">Record</paper-tab>
+            <paper-tab name="view">View</paper-tab>
+          </paper-tabs>
+        </core-toolbar>
+        <!--
+        <input type="text" id="inputElement" value="{{httpProxy}}" size="50">
+        -->
+        <core-pages selected="0">
+          <record-page>One</record-page>
+          <div>Two</div>
+        </core-pages>
+      </core-header-panel>
+    </template>
+    <script>
+    var tabs = document.querySelector('paper-tabs');
+    var pages = document.querySelector('core-pages');
+    tabs.addEventListener('core-select', function() {
+      pages.selected = (tabs.selected == 'record') ? 0 : 1;
+    });
+    </script>
+  </body>
+</html>

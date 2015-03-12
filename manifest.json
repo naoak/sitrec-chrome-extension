@@ -14,8 +14,7 @@
   },
   "browser_action": {
      "default_title": "Start recording.",
-     "default_icon": "images/sc.png",
-     "default_popup": "popup.html"
+     "default_icon": "images/sc.png"
    },
   "permissions": [
     "tabs",
@@ -25,5 +24,6 @@
     "storage",
     "proxy"
   ],
-  "web_accessible_resources": ["*"]
+  "web_accessible_resources": ["*"],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }
