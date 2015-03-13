@@ -12,7 +12,7 @@ $ bower install
 
 Concatenate a set of polymer components into one file.
 ```
-$ vulcanize --inline --csp main-panel.html
+$ vulcanize --inline --csp index.html
 ```
 
 Specify this extension directory from Chrome `Extensions`.
