@@ -1,10 +1,15 @@
 <link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/chrome-storage/chrome-storage.html">
 <link rel="import" href="bower_components/core-label/core-label.html">
 <link rel="import" href="bower_components/core-menu/core-menu.html">
+<link rel="import" href="bower_components/paper-shadow/paper-shadow.html">
 <link rel="import" href="bower_components/paper-input/paper-input.html">
+<link rel="import" href="bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="bower_components/paper-dropdown/paper-dropdown.html">
 <link rel="import" href="bower_components/paper-item/paper-item.html">
+<link rel="import" href="bower_components/paper-button/paper-button.html">
+<link rel="import" href="connectivity-check.html">
 
 <polymer-element name="setting-info">
   <template>
@@ -13,8 +18,13 @@
       display: block;
       width: 100%;
     }
+    :host .form-wrapper {
+      margin: 25px;
+      padding: 0;
+      background-color: #fefefe;
+    }
     :host form {
-      margin: 20px;
+      margin: 0;
       padding: 0;
     }
     :host form fieldset {
@@ -33,6 +43,8 @@
       box-sizing: border-box;
       width: 200px;
     }
+    :host connectivity-check {
+    }
     :host paper-item {
       overflow: hidden;
       white-space: nowrap;
@@ -41,59 +53,150 @@
     :host .unit {
       margin-left: 5px;
     }
+    :host #rec-btn {
+      margin: 20px auto;
+      background: red;
+      color: white;
+    }
     </style>
-    <form layout vertical left>
-      <fieldset class="basic-fields">
-        <div layout horizontal center>
-          <core-label>Record Name</core-label>
-          <paper-input label="Record Name" flex></paper-input>
-        </div>
-        <div layout horizontal center>
-          <core-label>Initial URL</core-label>
-          <paper-input label="Initial URL" flex></paper-input>
-        </div>
-        <div layout horizontal center>
-          <core-label>URL</core-label>
-          <paper-input label="URL" flex></paper-input>
-        </div>
-      </fieldset>
-      <fieldset class="server-fields">
-        <div layout horizontal center>
-          <core-label>Server</core-label>
-          <paper-input label="Server" flex></paper-input>
-        </div>
-        <div layout horizontal center>
-          <core-label>HTTP Proxy</core-label>
-          <paper-input label="HTTP Proxy" flex></paper-input>
-        </div>
-      </fieldset>
-      <fieldset class="recorder-option-fields">
-        <div layout horizontal center>
-          <core-label>Throttle</core-label>
-          <paper-dropdown-menu label="Throttle" flex>
-            <paper-dropdown class="dropdown">
-              <core-menu class="menu">
-                <paper-item>No Restriction</paper-item>
-                <paper-item>20MB 200ms</paper-item>
-              </core-menu>
-            </paper-dropdown>
-          </paper-dropdown-menu>
-        </div>
-        <div layout horizontal center>
-          <core-label>Loss Time</core-label>
-          <paper-input label="Loss Time" style="width: 6em;"></paper-input>
-          <span class="unit">ms</span>
-        </div>
-        <div layout horizontal center>
-          <core-label>FPS</core-label>
-          <paper-input label="FPS" style="width: 3em;"></paper-input>
-          <span class="unit">f/s</span>
-        </div>
-      </fieldset>
-    </form>
+
+    <!-- chrome.storage.sync -->
+    <chrome-storage name="recordName" value="{{options.recordName}}"></chrome-storage>
+    <chrome-storage name="server" value="{{options.server}}"></chrome-storage>
+    <chrome-storage name="httpProxy" value="{{options.httpProxy}}"></chrome-storage>
+    <chrome-storage name="initialUrl" value="{{options.initialUrl}}"></chrome-storage>
+    <chrome-storage name="url" value="{{options.url}}"></chrome-storage>
+    <chrome-storage name="throttle" value="{{options.throttle}}"></chrome-storage>
+    <chrome-storage name="losstime" value="{{options.losstime}}"></chrome-storage>
+    <chrome-storage name="fps" value="{{options.fps}}"></chrome-storage>
+
+    <paper-shadow class="form-wrapper" z="1">
+      <form layout vertical left>
+        <fieldset class="basic-fields">
+          <div layout horizontal center>
+            <core-label>Record Name</core-label>
+            <paper-input label="Record Name" flex value="{{options.recordName}}"></paper-input>
+          </div>
+          <div layout horizontal center>
+            <core-label>Initial URL</core-label>
+            <paper-input label="Initial URL" flex value="{{options.initialUrl}}"></paper-input>
+          </div>
+          <div layout horizontal center>
+            <core-label>URL</core-label>
+            <paper-input label="URL" flex value="{{options.url}}"></paper-input>
+          </div>
+        </fieldset>
+        <fieldset class="server-fields">
+          <div layout horizontal center>
+            <core-label>Server</core-label>
+            <paper-input id="server" label="Server" flex value="{{options.server}}"></paper-input>
+            <connectivity-check id="serverConnectivity"></connectivity-check>
+          </div>
+          <div layout horizontal center>
+            <core-label>HTTP Proxy</core-label>
+            <paper-input id="httpProxy" label="HTTP Proxy" flex value="{{options.httpProxy}}"></paper-input>
+            <connectivity-check id="httpProxyConnectivity"></connectivity-check>
+          </div>
+        </fieldset>
+        <fieldset class="recorder-option-fields">
+          <div layout horizontal center>
+            <core-label>Throttle</core-label>
+            <paper-dropdown-menu label="Throttle" flex>
+              <paper-dropdown class="dropdown">
+                <core-menu class="menu" selected="{{options.throttle}}" valueattr="value">
+                  <paper-item value="unlimited">No Restriction</paper-item>
+                  <paper-item value="20mbit:50ms">20Mbps 50ms</paper-item>
+                  <paper-item value="20mbit:200ms">20Mbps 200ms</paper-item>
+                  <paper-item value="2mbit:50ms">2Mbps 50ms</paper-item>
+                  <paper-item value="2mbit:200ms">2Mbps 200ms</paper-item>
+                </core-menu>
+              </paper-dropdown>
+            </paper-dropdown-menu>
+          </div>
+          <div layout horizontal center>
+            <core-label>Loss Time</core-label>
+            <paper-input label="Loss Time" value="{{options.losstime}}" style="width: 6em;"></paper-input>
+            <span class="unit">ms</span>
+          </div>
+          <div layout horizontal center>
+            <core-label>FPS</core-label>
+            <paper-input label="FPS" value="{{options.fps}}" style="width: 3em;"></paper-input>
+            <span class="unit">f/s</span>
+          </div>
+        </fieldset>
+        <paper-button id="rec-btn" raised on-click="{{onRecClick}}">{{recBtnLabel}}</paper-button>
+      </form>
+    </paper-shadow>
+
   </template>
   <script>
   Polymer({
+    created: function() {
+      this.options = {
+        recordName: 'Sample',
+        initialUrl: 'http://www.example.com/empty',
+        url: 'http://www.example.com/',
+        server: 'http://localhost:11080',
+        httpProxy: 'localhost:11001',
+        throttle: 0,
+        losstime: 0,
+        fps: 10
+      };
+      this.recBtnLabel = 'rec';
+    },
+    ready: function() {
+      var self = this;
+      chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+        if (typeof request.isRecording === 'boolean') {
+          self.recBtnLabel = request.isRecording ? 'stop' : 'rec';
+        }
+      });
+    },
+    debounceDelay: 500,
+    'options.serverChanged': function() {
+      var connectivity = this.$.serverConnectivity;
+      var server = this.$.server;
+      var self = this;
+      this.job('server', function() {
+        connectivity.check(server.value);
+      }, self.debounceDelay);
+    },
+    'options.httpProxyChanged': function() {
+      var connectivity = this.$.httpProxyConnectivity;
+      var httpProxy = this.$.httpProxy;
+      this.job('httpProxy', function() {
+        connectivity.state = 'checking';
+        connectivity.check('http://' + httpProxy.value);
+      }, self.debounceDelay);
+    },
+    onRecClick: function() {
+      function clone(obj) {
+        var temp;
+        if (obj == null || typeof(obj) != 'object') {
+          return obj;
+        }
+        temp = obj.constructor();
+        for (var key in obj) {
+          if (obj.hasOwnProperty(key)) {
+            temp[key] = clone(obj[key]);
+          }
+        }
+        return temp;
+      }
+      var self = this;
+      var options = clone(this.options);
+      if (options.throttle && options.throttle != 'unlimited') {
+        var tcParts = options.throttle.split(':');
+        options.throttle = {
+          rate: tcParts[0],
+          delay: tcParts[1]
+        };
+      }
+      else {
+        options.throttle = null;
+      }
+      chrome.runtime.sendMessage({toggleRecord: options});
+    }
   });
   </script>
 </polymer-element>

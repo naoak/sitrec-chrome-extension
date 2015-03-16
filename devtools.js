@@ -3,7 +3,7 @@ var backgroundPageConnection = chrome.runtime.connect({
 });
 
 backgroundPageConnection.postMessage({
-  name: 'init',
+  name: 'devtoolsopen',
   tabId: chrome.devtools.inspectedWindow.tabId
 });
 

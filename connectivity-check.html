@@ -1,0 +1,93 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="bower_components/core-icon/core-icon.html">
+<link rel="import" href="bower_components/core-icons/core-icons.html">
+<link rel="import" href="bower_components/core-tooltip/core-tooltip.html">
+
+<polymer-element name="connectivity-check">
+  <template>
+    <style>
+    :host .status {
+      position: relative;
+      width: 20px;
+      height: 20px;
+    }
+    :host core-tooltip {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+    :host paper-spinner {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+    :host core-icon[icon="done"] {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      color: green;
+    }
+    :host core-icon[icon="error"] {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      color: red;
+    }
+    </style>
+    <div class="status">
+      <template if="{{checking}}">
+        <core-tooltip label="Checking connectivity...">
+          <paper-spinner active></paper-spinner>
+        </core-tooltip>
+      </template>
+      <template if="{{done}}">
+        <core-tooltip label="Good Connectivity.">
+          <core-icon icon="done"></core-icon>
+        </core-tooltip>
+      </template>
+      <template if="{{error}}">
+        <core-tooltip label="Bad Connectivity.">
+          <core-icon icon="error"></core-icon>
+        </core-tooltip>
+      </template>
+    </div>
+  </template>
+  <script>
+  Polymer({
+    ready: function() {
+      this.state = 'none';
+    },
+    stateChanged: function() {
+      var self = this;
+      var state = this.state;
+      ['checking', 'done', 'error'].forEach(function(s) {
+        self[s] = (s == state);
+      });
+    },
+    check: function(url) {
+      var self = this;
+      var timer = null;
+      var xhr = new XMLHttpRequest();
+      self.state = 'checking';
+      xhr.onreadystatechange = function(){
+        if (xhr.readyState == 4) {
+          clearTimeout(timer);
+          if (xhr.status == 200) {
+            self.state = 'done';
+          }
+          else {
+            self.state = 'error';
+          }
+        }
+      }
+      xhr.open("GET", url, true);
+      xhr.send(null);
+      timer = setTimeout(function() {
+        xhr.abort();
+        self.state = 'error';
+      }, 3000);
+    }
+  });
+  </script>
+</polymer-element>

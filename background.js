@@ -2,10 +2,23 @@ var INITIAL_DELAY = 500;
 
 var recorder = new Recorder();
 
+function RecorderState() {
+  this.state = false;
+}
+
+RecorderState.prototype.set = function(state) {
+  this.state = state;
+  chrome.runtime.sendMessage({isRecording: state});
+};
+
+RecorderState.prototype.isRecording = function() {
+  return this.state;
+};
+
 function Recorder() {
   var self = this;
   this.quality = 50;
-  this.isRecording = false;
+  this.state = new RecorderState();
   this.images = [];
   this.timer = null;
   this.startDate = 0;
@@ -18,17 +31,12 @@ function Recorder() {
   function connectWithPopupWindow() {
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       if (request.toggleRecord) {
-        if (self.isRecording) {
+        if (self.state.isRecording()) {
           self.stop();
         }
         else {
           self.start(request.toggleRecord);
         }
-        sendResponse({isRecording: self.isRecording});
-      }
-      else if (request.targetTabId) {
-        self.requestHook.targetTabId = request.targetTabId;
-        sendResponse(null);
       }
     });
   }
@@ -37,7 +45,7 @@ function Recorder() {
     chrome.runtime.onConnect.addListener(function(port) {
       if (port.name == 'sitrec') {
         var extensionListener = function(message, sender, sendResponse) {
-          if (message.name == 'init') {
+          if (message.name == 'devtoolsopen') {
             self.connections[message.tabId] = port;
             return;
           }
@@ -68,7 +76,7 @@ Recorder.prototype.start = function(options) {
 
   server = (server.lastIndexOf('/') === server.length - 1) ? server.slice(0, server.length - 1) : server;
   options.server = server;
-  self.isRecording = true;
+  self.state.set(true);
   self.options = options;
   self.server = server;
   self.fps = parseInt(options.fps, 10);
@@ -90,11 +98,10 @@ Recorder.prototype.start = function(options) {
     };
     chrome.webNavigation.onCompleted.addListener(self.onLoadListener);
     self.startDate = Date.now();
-    if (self.options.enableHar) {
-      self.requestHook.start(options);
-    }
-    chrome.tabs.update({
-      url: options.url
+    self.requestHook.start(options);
+    chrome.tabs.update(self.targetTabId, {
+      url: options.url,
+      active: true
     });
     self.takeScreenCapture(index);
     self.timer = new IntervalTimer(function() {
@@ -115,8 +122,9 @@ Recorder.prototype.start = function(options) {
           }
         }
         chrome.webNavigation.onCompleted.addListener(onInitialLoadListener);
-        chrome.tabs.update({
-          url: options.initialUrl
+        chrome.tabs.update(self.targetTabId, {
+          url: options.initialUrl,
+          active: true
         });
       }
       else {
@@ -129,7 +137,7 @@ Recorder.prototype.start = function(options) {
 Recorder.prototype.takeScreenCapture = function(index, callback) {
   var self = this;
   chrome.browserAction.setBadgeText({text: '' + index});
-  chrome.tabs.captureVisibleTab(null, {quality: self.quality}, function(img) {
+  chrome.tabs.captureVisibleTab(self.targetWindowId, {quality: self.quality}, function(img) {
     img = img ? img : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     self.images.push({
       index: index,
@@ -144,7 +152,7 @@ Recorder.prototype.takeScreenCapture = function(index, callback) {
 
 Recorder.prototype.stop = function() {
   var self = this;
-  self.isRecording = false;
+  self.state.set(false);
 
   function doStop() {
     if (self.onLoadListener) {
@@ -153,33 +161,26 @@ Recorder.prototype.stop = function() {
     }
     chrome.browserAction.setIcon({path: 'images/sc.png'});
     chrome.browserAction.setTitle({title: 'Start recording.'});
-    if (self.options.enableHar) {
-      chrome.tabs.getSelected(null, function(tab) {
-        var port = self.connections[tab.id];
-        function harListener(message) {
-          if (message.responseHar) {
-            self.harLog = self.requestHook.fixHAR({
-              log: message.responseHar
-            });
-            self.requestHook.stop();
-            port.onMessage.removeListener(harListener);
-            self.showVideoPlaybackPage({
-              hash: 'upload'
-            });
-          }
-        }
-        if (port) {
-          port.onMessage.addListener(harListener);
-          port.postMessage({requestHar: true});
-        }
-        else {
-          self.requestHook.stop();
-          alert('To take a HAR file, DevTools must have been opened');
-          self.showVideoPlaybackPage();
-        }
-      });
+    var port = self.connections[self.targetTabId];
+    function harListener(message) {
+      if (message.responseHar) {
+        self.harLog = self.requestHook.fixHAR({
+          log: message.responseHar
+        });
+        self.requestHook.stop();
+        port.onMessage.removeListener(harListener);
+        self.showVideoPlaybackPage({
+          hash: 'upload'
+        });
+      }
+    }
+    if (port) {
+      port.onMessage.addListener(harListener);
+      port.postMessage({requestHar: true});
     }
     else {
+      self.requestHook.stop();
+      alert('To take a HAR file, DevTools must have been opened');
       self.showVideoPlaybackPage();
     }
   }
@@ -508,14 +509,25 @@ function clone(obj) {
 }
 
 chrome.browserAction.onClicked.addListener(function(tab) {
-  chrome.tabs.create({
-    url: chrome.extension.getURL('vulcanized.html'),
-    active: false
-  }, function(tab) {
-    chrome.windows.create({
-        tabId: tab.id,
-        type: 'popup',
-        focused: true
+  chrome.windows.getLastFocused(null, function(window) {
+    recorder.targetWindowId = window.id;
+    chrome.tabs.query({windowId: window.id, active: true}, function(tabs) {
+      if (tabs.length > 0) {
+        recorder.requestHook.targetTabId = recorder.targetTabId = tabs[0].id;
+        chrome.tabs.create({
+          url: chrome.extension.getURL('vulcanized.html'),
+          active: false
+        }, function(tab) {
+          chrome.windows.create({
+              tabId: tab.id,
+              type: 'popup',
+              focused: true
+          });
+        });
+      }
+      else {
+        alert('Error: Active tab is not found.');
+      }
     });
   });
 });
