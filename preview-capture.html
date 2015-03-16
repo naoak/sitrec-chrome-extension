@@ -1,0 +1,163 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+
+<polymer-element name="preview-capture">
+  <template>
+    <style>
+    :host {
+      display: block;
+      width: 100%;
+    }
+    :host #container {
+      position: relative;
+      width: 425px;
+      margin: 25px auto;
+      padding: 0;
+      border: solid 1px black;
+      background: black;
+    }
+    :host #image {
+      display: block;
+      width: 375px;
+      height: 667px;
+      margin: 20px auto;
+      box-shadow: 10px 10px 5px #000;
+    }
+    :host #controls_container {
+      margin: 20px;
+    }
+    :host #controls {
+      background: #888;
+      width: 340px;
+      margin: 0 auto;
+      border-radius: 5px;
+      padding-bottom: 20px;
+    }
+    :host #share {
+      float: right;
+    }
+    :host #status {
+      float: left;
+    }
+    :host input[type=range] {
+      appearance: none;
+      background-color: black;
+      width: 340px;
+      margin: 0 auto;
+      height: 10px;
+    }
+    :host input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      background-color: silver;
+      opacity: 0.9;
+      width: 7px;
+      height: 20px;
+    }
+    :host button {
+      width: 48px;
+      height: 48px;
+      border: 0;
+      opacity: 1;
+      background-repeat: no-repeat;
+      background-size: 32px;
+      background-position: 8px 8px;
+      background-color: transparent;
+      border-radius: 10px;
+      margin: 5px;
+    }
+    :host button:active {
+      opacity: 0.5;
+    }
+    :host button:hover {
+      box-shadow: inset 0 0 20px #666;
+    }
+    :host #seekTime {
+      display: block;
+      height: 48px;
+      width: 60px;
+      line-height: 48px;
+      color: #fff;
+      font-size: 20px;
+      text-align: right;
+    }
+    :host #playpause {
+      float: left;
+      width: 64px;
+      height: 64px;
+      background-size: 48px;
+      margin-left: 145px
+    }
+    :host #playpause.play { background-image: url(images/play.png); }
+    :host #playpause.pause { background-image: url(images/pause.png); }
+    :host #recordList { display: blocak; background-image: url(images/record-list.png); }
+    :host progress { width: 100% }
+    :host #bottom {
+      color: #ccc;
+      font-family: Verdana, sans-serif;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    :host #bottom > * { clear: both; display: none; }
+    :host #bottom .playback { display: block; }
+    :host #bottom .shared { padding: 15px; padding-bottom: 0; }
+    :host #bottom .shared .view { text-align: right; font-size: 14px; }
+    :host #bottom .shared .view .link > a { color: #ccc; }
+    :host #bottom .shared .copy { font-size: 12px; font-weight: normal; }
+    :host #bottom .shared .message { float: left; }
+    :host #bottom .upload .progress {
+      background-color: hsl(100, 57%, 40%);
+      background-image: -webkit-repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),
+      -webkit-repeating-linear-gradient(-35deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);
+    }
+    </style>
+
+    <div id="container">
+      <img id="image" src="" />
+      <div id="controls_container">
+        <div id="controls">
+          <button id="playpause" class="play"></button>
+          <div id="status">
+            <span id="seekTime"></span>
+          </div>
+          <div id="share">
+            <button id="recordList"></button>
+          </div>
+          <div id="bottom">
+            <div class="playback">
+              <input type="range" id="slider" value="0" min="0" max="100" on-change="{{onSliderChange}}"></input>
+            </div>
+            <span class="upload">
+              <div class="progress">&nbsp;</div>
+            </span>
+            <span class="shared">
+              <div class="message">Message</div>
+              <div class="view">
+                <div class="link">http://goo.gl/shortlink</div>
+                <div class="copy">Press &#8984;C to copy.</div>
+              </div>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </template>
+  <script src="rest.js"></script>
+  <script>
+  Polymer({
+    created: function() {
+    },
+    ready: function() {
+      this.$.slider.min = 0;
+      this.$.slider.max = 100;
+      this.$.slider.step = 1;
+
+      //$slider.setAttribute('min', 0);
+      //$slider.setAttribute('max', recorder.images.length - 1);
+      //$slider.setAttribute('step', 1);
+    },
+    onSliderChange: function() {
+      //alert(this.$.slider.value);
+    }
+  });
+  </script>
+</polymer-element>
