@@ -1,162 +1,250 @@
 <link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/core-icons/av-icons.html">
+<link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="bower_components/paper-slider/paper-slider.html">
 
 <polymer-element name="preview-capture">
   <template>
     <style>
     :host {
       display: block;
-      width: 100%;
+      padding: 25px;
+      box-sizing: border-box;
     }
-    :host #container {
+    :host #preview {
       position: relative;
-      width: 425px;
-      margin: 25px auto;
-      padding: 0;
-      border: solid 1px black;
-      background: black;
+      background: white;
+    }
+    :host #display {
+      position: relative;
+      padding: 20px;
     }
     :host #image {
       display: block;
       width: 375px;
       height: 667px;
-      margin: 20px auto;
-      box-shadow: 10px 10px 5px #000;
-    }
-    :host #controls_container {
-      margin: 20px;
-    }
-    :host #controls {
+      margin: auto;
       background: #888;
-      width: 340px;
-      margin: 0 auto;
-      border-radius: 5px;
-      padding-bottom: 20px;
     }
-    :host #share {
-      float: right;
-    }
-    :host #status {
-      float: left;
-    }
-    :host input[type=range] {
-      appearance: none;
-      background-color: black;
-      width: 340px;
-      margin: 0 auto;
-      height: 10px;
-    }
-    :host input[type="range"]::-webkit-slider-thumb {
-      appearance: none;
-      background-color: silver;
-      opacity: 0.9;
-      width: 7px;
-      height: 20px;
-    }
-    :host button {
-      width: 48px;
-      height: 48px;
-      border: 0;
-      opacity: 1;
-      background-repeat: no-repeat;
-      background-size: 32px;
-      background-position: 8px 8px;
-      background-color: transparent;
-      border-radius: 10px;
-      margin: 5px;
-    }
-    :host button:active {
-      opacity: 0.5;
-    }
-    :host button:hover {
-      box-shadow: inset 0 0 20px #666;
-    }
-    :host #seekTime {
+    :host #timingIndex {
       display: block;
-      height: 48px;
-      width: 60px;
-      line-height: 48px;
-      color: #fff;
-      font-size: 20px;
+      margin-bottom: -15px;
+      padding: 5px 10px;
       text-align: right;
+      font-size: 14px;
+      background: #e0e0e0;
     }
-    :host #playpause {
-      float: left;
-      width: 64px;
-      height: 64px;
-      background-size: 48px;
-      margin-left: 145px
+    :host #timingIndex:after {
+      content: ' ms';
     }
-    :host #playpause.play { background-image: url(images/play.png); }
-    :host #playpause.pause { background-image: url(images/pause.png); }
-    :host #recordList { display: blocak; background-image: url(images/record-list.png); }
-    :host progress { width: 100% }
-    :host #bottom {
-      color: #ccc;
-      font-family: Verdana, sans-serif;
-      font-weight: bold;
-      font-size: 16px;
+    :host #controller {
+      background: #e0e0e0;
+      margin: 0 auto;
+      border-radius-left-bottom: 5px;
+      border-radius-right-bottom: 5px;
     }
-    :host #bottom > * { clear: both; display: none; }
-    :host #bottom .playback { display: block; }
-    :host #bottom .shared { padding: 15px; padding-bottom: 0; }
-    :host #bottom .shared .view { text-align: right; font-size: 14px; }
-    :host #bottom .shared .view .link > a { color: #ccc; }
-    :host #bottom .shared .copy { font-size: 12px; font-weight: normal; }
-    :host #bottom .shared .message { float: left; }
-    :host #bottom .upload .progress {
-      background-color: hsl(100, 57%, 40%);
-      background-image: -webkit-repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),
-      -webkit-repeating-linear-gradient(-35deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);
+    :host #recording {
+      margin: 10px 15px;
+    }
+    :host #slider {
+      width: 100%;
+      margin: 10px 0;
+    }
+    :host #slider::shadow #sliderBar::shadow #activeProgress {
+      background-color: #0f9d58;
+    }
+    :host #slider::shadow #sliderKnobInner {
+      background-color: #0f9d58;
+    }
+    :host #slider[uploading]::shadow #sliderBar::shadow #activeProgress {
+      background-color: red;
+    }
+    :host #slider[uploading]::shadow #sliderKnobInner {
+      background-color: red;
+    }
+    :host paper-icon-button::shadow core-icon {
+      transform: scale(1.5);
+    }
+    :host .buttons paper-icon-button {
+      margin: 0 20px
     }
     </style>
 
-    <div id="container">
-      <img id="image" src="" />
-      <div id="controls_container">
-        <div id="controls">
-          <button id="playpause" class="play"></button>
-          <div id="status">
-            <span id="seekTime"></span>
-          </div>
-          <div id="share">
-            <button id="recordList"></button>
-          </div>
-          <div id="bottom">
-            <div class="playback">
-              <input type="range" id="slider" value="0" min="0" max="100" on-change="{{onSliderChange}}"></input>
-            </div>
-            <span class="upload">
-              <div class="progress">&nbsp;</div>
-            </span>
-            <span class="shared">
-              <div class="message">Message</div>
-              <div class="view">
-                <div class="link">http://goo.gl/shortlink</div>
-                <div class="copy">Press &#8984;C to copy.</div>
-              </div>
-            </span>
-          </div>
-        </div>
+    <paper-shadow id="preview" z="1">
+      <div id="display">
+        <img id="image" src="{{image}}" />
       </div>
-    </div>
-
+      <div>
+        <span id="timingIndex">{{timingIndex}}</span>
+      </div>
+      <div id="controller" layout vertical center>
+        <template if="{{recording}}">
+          <div id="recording">
+            <paper-spinner active></paper-spinner>
+          </div>
+        </template>
+        <template if="{{!recording}}">
+          <paper-slider id="slider" min="0" max="{{sliderMax}}" step="1" value="{{currentIndex}}" uploading?="{{uploading}}" on-change="{{sliderChange}}"></paper-slider>
+          <div class="buttons">
+            <paper-icon-button role="button" icon="av:skip-previous" title="previous" on-click="{{stepPrevious}}"></paper-icon-button>
+            <paper-icon-button id="playpause" role="button" icon="{{playpauseIcon}}" title="play or pause" on-click="{{playpause}}"></paper-icon-button>
+            <paper-icon-button role="button" icon="av:skip-next" title="next" on-click="{{stepNext}}"></paper-icon-button>
+          </div>
+        </template>
+      </div>
+    </paper-shadow>
   </template>
+
   <script src="rest.js"></script>
   <script>
   Polymer({
     created: function() {
+      this.image = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+      this.playpauseIcon = 'av:play-arrow';
+      this.currentIndex = 0;
+      this.sliderMax = 0;
+      this.playing = false;
     },
     ready: function() {
-      this.$.slider.min = 0;
-      this.$.slider.max = 100;
-      this.$.slider.step = 1;
-
-      //$slider.setAttribute('min', 0);
-      //$slider.setAttribute('max', recorder.images.length - 1);
-      //$slider.setAttribute('step', 1);
+      var self = this;
+      var background;
+      background = chrome.extension.getBackgroundPage();
+      this.background = background;
+      chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+        if (request.capture) {
+          var index = request.capture.index;
+          self.updateImage(index);
+        }
+        else if (request.recordState) {
+          var recording = request.recordState.recording;
+          self.recording = recording;
+          if (!recording) {
+            self.initSlider();
+            if (background.recorder.harLog) {
+              self.uploadAll();
+            }
+          }
+        }
+      });
+      if (background.recorder.images && background.recorder.images.length > 0) {
+        self.initSlider();
+      }
     },
-    onSliderChange: function() {
-      //alert(this.$.slider.value);
+    initSlider: function() {
+      var self = this;
+      var background = this.background;
+      var recorder = background.recorder;
+      self.throttle = recorder.options.throttle;
+      self.currentIndex = 0;
+      self.timingIndex = 0;
+      self.sliderMax = recorder.images.length - 1;
+      self.playing = false;
+      self.uploading = false;
+    },
+    playpause: function() {
+      if (this.playing) {
+        this.pause();
+      }
+      else {
+        this.play();
+      }
+    },
+    sliderChange: function() {
+      if (this.playing) {
+        this.pause();
+      }
+      this.setIndex(this.currentIndex);
+    },
+    play: function() {
+      var self = this;
+      var recorder = self.background.recorder;
+      var interval = 1000 / recorder.fps;
+      this.playing = true;
+      this.playpauseIcon = 'av:pause';
+      if (this.currentIndex == recorder.images.length - 1) {
+        this.setIndex(0);
+      }
+      this.async(function nextStep() {
+        if (self.playing) {
+          if (self.currentIndex < recorder.images.length - 1) {
+            self.setIndex(self.currentIndex + 1);
+            self.async(nextStep, null, interval);
+          }
+          else {
+            self.pause();
+          }
+        }
+      }, null, interval);
+    },
+    pause: function() {
+      this.playing = false;
+      this.playpauseIcon = 'av:play-arrow';
+    },
+    stepNext: function() {
+      if (this.playing) {
+        this.pause();
+      }
+      this.setIndex(this.currentIndex + 1);
+    },
+    stepPrevious: function() {
+      if (this.playing) {
+        this.pause();
+      }
+      this.setIndex(this.currentIndex - 1);
+    },
+    setIndex: function(index) {
+      var recorder = this.background.recorder;
+      if (index >= recorder.images.length) {
+        index = recorder.images.length - 1;
+      }
+      if (index < 0) {
+        index = 0;
+      }
+      this.currentIndex = index;
+      this.timingIndex = recorder.fps * index;
+      this.updateImage(index);
+    },
+    updateImage: function(index) {
+      var images = this.background.recorder.images;
+      var image = images[index];
+      this.$.image.src = image.data;
+    },
+    uploadAll: function() {
+      var self = this;
+      var recorder = self.background.recorder;
+      self.uploading = true;
+      getOrCreateRecord(recorder.server, recorder.fullRecordName, function(record) {
+        self.uploadNext(record, 0);
+      });
+    },
+    uploadNext: function(record, i) {
+      var self = this;
+      var recorder = this.background.recorder;
+      var image;
+      var photoName;
+      var dataUri;
+      if (i < recorder.images.length) {
+        this.setIndex(i);
+        image = recorder.images[i];
+        photoName = '' + (image.index * (1000 / recorder.fps));
+        dataUri = image.data;
+        uploadPhoto(recorder.server, record.name, photoName, dataUri, function(data) {
+          self.uploadNext(record, i + 1);
+        }, function(loaded, total) {
+        });
+      }
+      else {
+        if (recorder.harLog) {
+          uploadHar(recorder.server, record.name, recorder.harLog, function() {
+            recorder.alert('All images and a HAR file have been uploaded');
+            self.uploading = false;
+          });
+        }
+        else {
+          self.uploading = false;
+        }
+      }
     }
   });
   </script>

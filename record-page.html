@@ -1,6 +1,7 @@
 <link rel="import" href="bower_components/polymer/polymer.html">
 <link rel="import" href="setting-info.html">
 <link rel="import" href="preview-capture.html">
+<link rel="import" href="bower_components/paper-toast/paper-toast.html">
 
 <polymer-element name="record-page">
   <template>
@@ -10,13 +11,25 @@
       width: 100%;
     }
     </style>
-    <div horizontal layout>
-      <setting-info style="width: 400px"></setting-info>
+    <core-media-query query="max-width: 920px" queryMatches="{{phoneScreen}}"></core-media-query>
+    <div layout vertical?={{phoneScreen}} horizontal?={{!phoneScreen}} center?={{phoneScreen}}>
+      <setting-info style="width: 460px;"></setting-info>
       <preview-capture flex></preview-capture>
     </div>
+    <paper-toast id="toast" text=""></paper-toast>
   </template>
   <script>
   Polymer({
+    ready: function() {
+      var self = this;
+      chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+        if (request.alert) {
+          var message = request.alert.message;
+          self.$.toast.text= message;
+          self.$.toast.show();
+        }
+      });
+    }
   });
   </script>
 </polymer-element>

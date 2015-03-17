@@ -8,7 +8,11 @@ function RecorderState() {
 
 RecorderState.prototype.set = function(state) {
   this.state = state;
-  chrome.runtime.sendMessage({isRecording: state});
+  chrome.runtime.sendMessage({
+    recordState: {
+      recording: state
+    }
+  });
 };
 
 RecorderState.prototype.isRecording = function() {
@@ -84,6 +88,7 @@ Recorder.prototype.start = function(options) {
   self.recordName = options.recordName || '';
   self.tc = new TrafficControl(options.server);
   self.images = [];
+  self.harLog = null;
 
   chrome.browserAction.setIcon({path: 'images/sc-rec.png'});
   chrome.browserAction.setTitle({title: 'Stop recording.'});
@@ -103,9 +108,9 @@ Recorder.prototype.start = function(options) {
       url: options.url,
       active: true
     });
-    self.takeScreenCapture(index);
+    self.takeScreenCapture(index, postCaptureMessage);
     self.timer = new IntervalTimer(function() {
-      self.takeScreenCapture(++index);
+      self.takeScreenCapture(++index, postCaptureMessage);
     }, 1000 / self.fps);
     self.timer.start();
   }
@@ -132,6 +137,14 @@ Recorder.prototype.start = function(options) {
       }
     });
   });
+
+  function postCaptureMessage() {
+    chrome.runtime.sendMessage({
+      capture: {
+        index: index
+      }
+    });
+  }
 };
 
 Recorder.prototype.takeScreenCapture = function(index, callback) {
@@ -145,14 +158,13 @@ Recorder.prototype.takeScreenCapture = function(index, callback) {
       data: img
     });
     if (callback) {
-      callback();
+      callback(index);
     }
   });
 };
 
 Recorder.prototype.stop = function() {
   var self = this;
-  self.state.set(false);
 
   function doStop() {
     if (self.onLoadListener) {
@@ -164,15 +176,14 @@ Recorder.prototype.stop = function() {
     var port = self.connections[self.targetTabId];
     function harListener(message) {
       if (message.responseHar) {
+        self.makeFullRecordName();
         self.harLog = self.requestHook.fixHAR({
           log: message.responseHar
         });
         self.requestHook.stop();
         port.onMessage.removeListener(harListener);
-        self.showVideoPlaybackPage({
-          hash: 'upload'
-        });
       }
+      self.state.set(false);
     }
     if (port) {
       port.onMessage.addListener(harListener);
@@ -180,8 +191,8 @@ Recorder.prototype.stop = function() {
     }
     else {
       self.requestHook.stop();
-      alert('To take a HAR file, DevTools must have been opened');
-      self.showVideoPlaybackPage();
+      self.alert('To take a HAR file, DevTools must have been opened');
+      self.state.set(false);
     }
   }
 
@@ -192,21 +203,22 @@ Recorder.prototype.stop = function() {
   });
 };
 
-Recorder.prototype.showVideoPlaybackPage = function(playbackOptions) {
+Recorder.prototype.alert = function(message) {
+  chrome.runtime.sendMessage({
+    alert: {
+      message: message
+    }
+  });
+};
+
+Recorder.prototype.makeFullRecordName = function() {
   var throttle = this.options.throttle;
   var recordName = this.recordName;
-
   if (throttle) {
     recordName += '-' + throttle.rate + throttle.delay;
   }
   recordName += '-' + formatDate(new Date(this.startDate));
   this.fullRecordName = recordName;
-
-  var playbackUrl = 'playback.html';
-  playbackUrl += (playbackOptions && playbackOptions.hash) ? '#' + playbackOptions.hash : '';
-  playbackUrl = chrome.extension.getURL(playbackUrl);
-
-  chrome.tabs.create({url: playbackUrl});
 };
 
 function IntervalTimer(proc, span) {
@@ -328,6 +340,7 @@ RequestHook.prototype.stop = function() {
 };
 
 RequestHook.prototype.fixHAR = function(har) {
+  var self = this;
 
   function isEmptyObject(obj) {
     return typeof obj === 'object' && Object.keys(obj).length === 0;
@@ -385,9 +398,9 @@ RequestHook.prototype.fixHAR = function(har) {
       });
 
       if (details.length > 0) {
-        alert(details.length + " request entries remain not to match");
+        self.alert(details.length + " request entries remain not to match");
         details.forEach(function(d) {
-          alert(d.url);
+          self.alert(d.url);
         });
       }
     }

@@ -16,16 +16,11 @@
     <style>
     :host {
       display: block;
-      width: 100%;
-    }
-    :host .form-wrapper {
-      margin: 25px;
-      padding: 0;
-      background-color: #fefefe;
+      padding: 25px;
+      box-sizing: border-box;
     }
     :host form {
-      margin: 0;
-      padding: 0;
+      background-color: white;
     }
     :host form fieldset {
       margin: 20px;
@@ -70,7 +65,7 @@
     <chrome-storage name="losstime" value="{{options.losstime}}"></chrome-storage>
     <chrome-storage name="fps" value="{{options.fps}}"></chrome-storage>
 
-    <paper-shadow class="form-wrapper" z="1">
+    <paper-shadow z="1">
       <form layout vertical left>
         <fieldset class="basic-fields">
           <div layout horizontal center>
@@ -147,8 +142,8 @@
     ready: function() {
       var self = this;
       chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-        if (typeof request.isRecording === 'boolean') {
-          self.recBtnLabel = request.isRecording ? 'stop' : 'rec';
+        if (request.recordState) {
+          self.recBtnLabel = request.recordState.recording ? 'stop' : 'rec';
         }
       });
     },
