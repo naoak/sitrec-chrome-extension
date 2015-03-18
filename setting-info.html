@@ -146,6 +146,8 @@
           self.recBtnLabel = request.recordState.recording ? 'stop' : 'rec';
         }
       });
+      this['options.serverChanged']();
+      this['options.httpProxyChanged']();
     },
     debounceDelay: 500,
     'options.serverChanged': function() {
