@@ -1,4 +1,5 @@
 <link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/core-ajax/core-ajax.html">
 <link rel="import" href="bower_components/paper-shadow/paper-shadow.html">
 <link rel="import" href="record-item.html">
 
@@ -11,6 +12,7 @@
       box-sizing: border-box;
     }
     </style>
+    <core-ajax url="http://localhost:11080/api/record/list" handleAs="json" auto on-core-response="{{handleResponse}}"></core-ajax>
     <div horizontal layout wrap>
     <template repeat='{{records}}'>
       <record-item name="{{name}}" url="{{url}}" throttle="{{throttle}}" timing="{{timing}}" date="{{date}}"></record-item>
@@ -20,6 +22,7 @@
   <script>
   Polymer({
     created: function() {
+      this.records = [];
     },
     ready: function() {
       this.records = [
@@ -52,6 +55,15 @@
           fullName: 'Test-xxx'
         }
       ];
+    },
+    handleResponse: function(e, res) {
+      /*
+      this.records = res.response.items.map(function(name) {
+        return {
+          name: name
+        };
+      });
+      */
     }
   });
   </script>
