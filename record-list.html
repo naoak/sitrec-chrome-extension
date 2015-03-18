@@ -12,7 +12,8 @@
       box-sizing: border-box;
     }
     </style>
-    <core-ajax url="http://localhost:11080/api/record/list" handleAs="json" auto on-core-response="{{handleResponse}}"></core-ajax>
+    <chrome-storage name="server" value="{{server}}" on-chrome-storage-load="{{loadDetailList}}"></chrome-storage>
+    <core-ajax id="ajax" url="{{server}}/api/record/detailList" handleAs="json"></core-ajax>
     <div horizontal layout wrap>
     <template repeat='{{records}}'>
       <record-item name="{{name}}" url="{{url}}" throttle="{{throttle}}" timing="{{timing}}" date="{{date}}"></record-item>
@@ -25,45 +26,13 @@
       this.records = [];
     },
     ready: function() {
-      this.records = [
-        {
-          name: 'Sample',
-          url: 'http://www.example.com/pattern1',
-          throttle: {
-            rate: '2mbit',
-            delay: '20ms'
-          },
-          timing: {
-            domContentLoad: '3000ms',
-            load: '5000ms',
-          },
-          date: '2015-3-15',
-          fullName: 'Sample-xxx'
-        },
-        {
-          name: 'Test',
-          url: 'http://www.example.com/pattern2',
-          throttle: {
-            rate: '2mbit',
-            delay: '50ms'
-          },
-          timing: {
-            domContentLoad: '5000ms',
-            load: '8000ms',
-          },
-          date: '2015-3-15',
-          fullName: 'Test-xxx'
-        }
-      ];
-    },
-    handleResponse: function(e, res) {
-      /*
-      this.records = res.response.items.map(function(name) {
-        return {
-          name: name
-        };
+      var self = this;
+      this.$.ajax.addEventListener('core-response', function(e) {
+        self.records = this.response.items;
       });
-      */
+    },
+    loadDetailList: function() {
+      this.$.ajax.go();
     }
   });
   </script>
