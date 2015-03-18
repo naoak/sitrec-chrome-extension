@@ -25,43 +25,36 @@
       text-align: center;
     }
     :host #name {
-      height: 20px;
-      margin: 0;
-      padding: 0;
-      line-height: 20px;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      padding: 4px 5px;
+      background-color: #3fa370;
+      color: white;
     }
     :host #url {
       height: 20px;
       margin: 0 5px;
-      line-height: 20px;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    :host #timing {
       color: green;
     }
     :host #throttle {
-      padding: 3px 5px;
-      background-color: #3fa370;
-      color: white;
-    }
-    :host #timing {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      padding: 0 5px;
+      height: 20px;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     :host #date {
       position: absolute;
       bottom: 0;
       right: 0;
       padding: 0 5px;
-      color: #666;
     }
     :host #check {
       position: absolute;
-      top: 3px;
-      right: 3px;
+      top: 4px;
+      right: 4px;
       overflow: hidden;
     }
     :host #check::shadow #checkbox {
@@ -78,17 +71,18 @@
     </style>
     <paper-shadow z="1" id="item" vertical layout>
       <div id="center">
-        <h2 id="name" center>{{name}}</h2>
         <div id="url">
           {{url}}
         </div>
+        <div id="throttle">
+          {{throttle.rate}} {{throttle.delay}}
+        </div>
+        <div id="timing">
+          {{timing.domContentLoad}} {{timing.load}}
+        </div>
       </div>
-      <div id="throttle">
-        {{throttle.rate}} {{throttle.delay}}
-      </div>
-      <div id="timing">
-        <div>{{timing.domContentLoad}}</div>
-        <div>{{timing.load}}</div>
+      <div id="name">
+        {{name}}
       </div>
       <div id="date">
         {{date}}
