@@ -1,0 +1,37 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="bower_components/core-toolbar/core-toolbar.html">
+<link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
+<link rel="import" href="record-list.html">
+
+<polymer-element name="view-page">
+  <template>
+    <style>
+    :host {
+      display: block;
+      width: 100%;
+    }
+    </style>
+    <core-toolbar>
+      <core-icon-button icon="file-download" on-tap="{{menuAction}}"></core-icon-button>
+      <core-icon-button icon="delete" on-tap="{{menuAction}}"></core-icon-button>
+    </core-toolbar>
+
+    <record-list></record-list>
+    <paper-toast id="toast" text=""></paper-toast>
+  </template>
+  <script>
+  Polymer({
+    ready: function() {
+      var self = this;
+      chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+        if (request.alert) {
+          var message = request.alert.message;
+          self.$.toast.text= message;
+          self.$.toast.show();
+        }
+      });
+    }
+  });
+  </script>
+</polymer-element>

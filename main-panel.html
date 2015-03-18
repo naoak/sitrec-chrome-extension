@@ -4,6 +4,7 @@
 <link rel="import" href="bower_components/core-pages/core-pages.html">
 <link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="record-page.html">
+<link rel="import" href="view-page.html">
 
 <polymer-element name="main-panel">
   <template>
@@ -31,14 +32,14 @@
     </style>
     <core-header-panel>
       <core-toolbar>
-        <paper-tabs id="tabs" selected="record" self-end>
-          <paper-tab name="record">Record</paper-tab>
+        <paper-tabs id="tabs" selected="view" self-end>
           <paper-tab name="view">View</paper-tab>
+          <paper-tab name="record">Record</paper-tab>
         </paper-tabs>
       </core-toolbar>
       <core-pages id="pages" selected="0">
-        <record-page>One</record-page>
-        <div>Two</div>
+        <view-page></view-page>
+        <record-page></record-page>
       </core-pages>
     </core-header-panel>
   </template>
@@ -48,7 +49,7 @@
         var tabs = this.$.tabs;
         var pages = this.$.pages;
         this.$.tabs.addEventListener('core-select', function() {
-          pages.selected = (tabs.selected == 'record') ? 0 : 1;
+          pages.selected = (tabs.selected == 'view') ? 0 : 1;
         });
       }
     });

@@ -1,0 +1,107 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/paper-shadow/paper-shadow.html">
+<link rel="import" href="bower_components/paper-checkbox/paper-checkbox.html">
+
+<polymer-element name="record-item" attributes="name url throttle timing date fullName">
+  <template>
+    <style>
+    :host {
+      display: block;
+      background-color: white;
+      margin: 5px;
+    }
+    :host #item {
+      position: relative;
+      width: 200px;
+      height: 120px;
+    }
+    :host #center {
+      position: absolute;
+      top: 60px;
+      width: 200px;
+      height: 40px;
+      margin-top: -20px;
+      padding: 0;
+      text-align: center;
+    }
+    :host #name {
+      height: 20px;
+      margin: 0;
+      padding: 0;
+      line-height: 20px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    :host #url {
+      height: 20px;
+      margin: 0 5px;
+      line-height: 20px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: green;
+    }
+    :host #throttle {
+      padding: 3px 5px;
+      background-color: #3fa370;
+      color: white;
+    }
+    :host #timing {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      padding: 0 5px;
+    }
+    :host #date {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      padding: 0 5px;
+      color: #666;
+    }
+    :host #check {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      overflow: hidden;
+    }
+    :host #check::shadow #checkbox {
+      border-color: white;
+    }
+    :host #check::shadow #checkbox.checked {
+    }
+    :host #check::shadow #ink {
+      background-color: white;
+    }
+    :host #check::shadow #ink[checked] {
+      background-color: white;
+    }
+    </style>
+    <paper-shadow z="1" id="item" vertical layout>
+      <div id="center">
+        <h2 id="name" center>{{name}}</h2>
+        <div id="url">
+          {{url}}
+        </div>
+      </div>
+      <div id="throttle">
+        {{throttle.rate}} {{throttle.delay}}
+      </div>
+      <div id="timing">
+        <div>{{timing.domContentLoad}}</div>
+        <div>{{timing.load}}</div>
+      </div>
+      <div id="date">
+        {{date}}
+      </div>
+      <paper-checkbox id="check"></paper-checkbox>
+    </paper-shadow>
+  </template>
+  <script>
+  Polymer({
+    created: function() {
+    },
+    ready: function() {
+    }
+  });
+  </script>
+</polymer-element>
