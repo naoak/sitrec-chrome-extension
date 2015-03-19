@@ -28,7 +28,14 @@
     ready: function() {
       var self = this;
       this.$.ajax.addEventListener('core-response', function(e) {
-        self.records = this.response.items;
+        var records = this.response.items;
+        self.records = records.map(function(r) {
+          var i = r.url.indexOf('://');
+          if (i >= 0) {
+            r.url = r.url.slice(i + 3);
+          }
+          return r;
+        });
       });
     },
     loadDetailList: function() {
