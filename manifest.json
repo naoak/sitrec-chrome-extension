@@ -20,9 +20,9 @@
     "tabs",
     "webNavigation",
     "webRequest",
-    "<all_urls>",
     "storage",
-    "proxy"
+    "proxy",
+    "<all_urls>"
   ],
   "web_accessible_resources": ["*"],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
