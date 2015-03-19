@@ -41,10 +41,14 @@
       this.$.ajax.addEventListener('core-response', function(e) {
         var records = this.response.items;
         self.records = records.map(function(r) {
-          var i = r.url.indexOf('://');
-          if (i >= 0) {
-            r.url = r.url.slice(i + 3);
+          function trimProtocol(url) {
+            var i = url.indexOf('://');
+            if (i >= 0) {
+              url = url.slice(i + 3);
+            }
+            return url;
           }
+          r.url = trimProtocol(r.url);
           return r;
         });
       });
