@@ -11,14 +11,25 @@
       padding: 25px;
       box-sizing: border-box;
     }
+    :host ul {
+      margin: 0;
+      padding: 0;
+      list-style-type: none;
+    }
+    :host li {
+      margin: 0;
+      padding: 0;
+    }
     </style>
     <chrome-storage name="server" value="{{server}}" on-chrome-storage-load="{{loadDetailList}}"></chrome-storage>
     <core-ajax id="ajax" url="{{server}}/api/record/detailList" handleAs="json"></core-ajax>
-    <div horizontal layout wrap>
+    <ul horizontal layout wrap>
     <template repeat='{{records}}'>
-      <record-item name="{{name}}" url="{{url}}" throttle="{{throttle}}" timing="{{timing}}" date="{{date}}"></record-item>
+      <li>
+        <record-item name="{{name}}" url="{{url}}" throttle="{{throttle}}" timing="{{timing}}" date="{{date}}"></record-item>
+      </li>
     </template>
-    </div>
+    </ul>
   </template>
   <script>
   Polymer({
