@@ -2,7 +2,10 @@
 <link rel="import" href="bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="bower_components/core-toolbar/core-toolbar.html">
 <link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
+<link rel="import" href="bower_components/core-animated-pages/core-animated-pages.html">
+<link rel="import" href="bower_components/chrome-storage/chrome-storage.html">
 <link rel="import" href="record-list.html">
+<link rel="import" href="record-detail.html">
 
 <polymer-element name="view-page">
   <template>
@@ -12,12 +15,11 @@
       width: 100%;
     }
     </style>
-    <core-toolbar>
-      <core-icon-button icon="file-download" on-tap="{{menuAction}}"></core-icon-button>
-      <core-icon-button icon="delete" on-tap="{{menuAction}}"></core-icon-button>
-    </core-toolbar>
-
-    <record-list></record-list>
+    <chrome-storage name="server" value="{{server}}"></chrome-storage>
+    <core-animated-pages id="pages" class="fit" selected="0" transitions="cross-fade-all">
+      <record-list id="list" server="{{server}}"></record-list>
+      <record-detail id="detail" server="{{server}}"></record-detail>
+    </core-animated-pages>
     <paper-toast id="toast" text=""></paper-toast>
   </template>
   <script>
@@ -31,6 +33,21 @@
           self.$.toast.show();
         }
       });
+      this.addEventListener('toList', this.toList);
+      this.addEventListener('toDetail', this.toDetail);
+    },
+    toList: function(e) {
+      this.$.pages.selected = 0;
+    },
+    toDetail: function(e) {
+      var detail = this.$.detail;
+      detail.name = e.detail.name;
+      detail.url = e.detail.url;
+      detail.throttle = e.detail.throttle;
+      detail.timing = e.detail.timing;
+      detail.date = e.detail.date;
+      detail.fullName = e.detail.fullName;
+      this.$.pages.selected = 1;
     }
   });
   </script>

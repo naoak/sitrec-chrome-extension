@@ -3,30 +3,32 @@
 <link rel="import" href="bower_components/paper-shadow/paper-shadow.html">
 <link rel="import" href="record-item.html">
 
-<polymer-element name="record-list">
+<polymer-element name="record-list" attributes="server">
   <template>
     <style>
     :host {
       display: block;
-      padding: 25px;
-      box-sizing: border-box;
     }
     :host ul {
       margin: 0;
-      padding: 0;
+      padding: 25px;
       list-style-type: none;
+      box-sizing: border-box;
     }
     :host li {
       margin: 0;
       padding: 0;
     }
     </style>
-    <chrome-storage name="server" value="{{server}}" on-chrome-storage-load="{{loadDetailList}}"></chrome-storage>
     <core-ajax id="ajax" url="{{server}}/api/record/detailList" handleAs="json"></core-ajax>
+    <core-toolbar>
+      <core-icon-button icon="file-download"></core-icon-button>
+      <core-icon-button icon="delete" on-tap="{{menuAction}}"></core-icon-button>
+    </core-toolbar>
     <ul horizontal layout wrap>
     <template repeat='{{records}}'>
       <li>
-        <record-item name="{{name}}" url="{{url}}" throttle="{{throttle}}" timing="{{timing}}" date="{{date}}"></record-item>
+        <record-item name="{{name}}" url="{{url}}" throttle="{{throttle}}" timing="{{timing}}" date="{{date}}" fullName="{{fullName}}"></record-item>
       </li>
     </template>
     </ul>
@@ -52,6 +54,9 @@
           return r;
         });
       });
+    },
+    serverChanged: function() {
+      this.loadDetailList();
     },
     loadDetailList: function() {
       this.$.ajax.go();

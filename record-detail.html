@@ -1,0 +1,105 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/core-ajax/core-ajax.html">
+
+<polymer-element name="record-detail" attributes="server name url throttle timing date fullName">
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+    :host #title {
+      margin-right: 5px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    :host #throttle {
+      margin: 0 5px;
+    }
+    :host #url {
+      margin: 0 5px;
+    }
+    :host #date {
+      margin: 0 5px;
+    }
+    :host ul {
+      width: 950px;
+      margin: 0;
+      padding: 25px;
+      list-style-type: none;
+      box-sizing: border-box;
+    }
+    :host li {
+      width: 75px;
+      height: 120px;
+      margin: 5px;
+      padding: 0;
+    }
+    :host .thumbnail {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    </style>
+    <core-ajax id="ajax" url="{{server}}/api/record/detail/{{fullName}}" handleAs="json"></core-ajax>
+    <core-toolbar>
+      <core-icon-button icon="arrow-back" on-tap={{back}}"></core-icon-button>
+      <div flex><span id="title">{{name}}</span> <span id="throttle">{{throttle.rate}} {{throttle.delay}}</span> <span id="url">{{url}}</span> <span id="date">{{date}}</span></div>
+    </core-toolbar>
+    <table id="timing">
+      <tr>
+        <th class="event">Event</th>
+        <th class="ms">ms</th>
+      </tr>
+      <tr>
+        <td class="event">DOMContentLoad</td>
+        <td class="ms">{{timing.contentLoad}}</td>
+      </tr>
+      <tr>
+        <td class="event">Load</td>
+        <td class="ms">{{timing.load}}</td>
+      </tr>
+    </table>
+    {{server}}
+    {{name}}
+    {{url}}
+    {{throttle.rate}}
+    {{throttle.delay}}
+    {{timing.contentLoad}}
+    {{timing.load}}
+    {{date}}
+    {{fullName}}
+    <ul horizontal layout wrap>
+      <template repeat="{{images}}">
+      <li>
+        <img class="thumbnail" src="{{url}}">
+      </li>
+      </template>
+    </ul>
+  </template>
+  <script>
+  Polymer({
+    created: function() {
+    },
+    ready: function() {
+      var self = this;
+      this.$.ajax.addEventListener('core-response', function(e) {
+        self.images = this.response.images.map(function(image) {
+          return {
+            ms: image.ms,
+            url: self.server + image.path
+          };
+        });
+      });
+    },
+    fullNameChanged: function() {
+      this.loadDetail();
+    },
+    loadDetail: function() {
+      this.$.ajax.go();
+    },
+    back: function() {
+      this.fire('toList', {});
+    }
+  });
+  </script>
+</polymer-element>

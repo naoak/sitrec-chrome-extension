@@ -64,12 +64,12 @@
       padding: 0 5px;
     }
     </style>
-    <paper-shadow z="1" id="item" vertical layout>
+    <paper-shadow z="1" id="item" vertical layout on-click="{{onClick}}">
       <header id="header">
         <div id="name">
           {{name}}
         </div>
-        <paper-checkbox id="check"></paper-checkbox>
+        <paper-checkbox id="check" on-click="{{onCheckClick}}" on-change="{{onCheckChange}}"></paper-checkbox>
       </header>
       <div id="center">
         <div id="url">
@@ -92,6 +92,22 @@
     created: function() {
     },
     ready: function() {
+    },
+    onCheckClick: function(e) {
+      e.stopPropagation();
+    },
+    onCheckChange: function() {
+    },
+    onClick: function() {
+      var self = this;
+      this.fire('toDetail', {
+        name: self.name,
+        url: self.url,
+        throttle: self.throttle,
+        timing: self.timing,
+        date: self.date,
+        fullName: self.fullName
+      });
     }
   });
   </script>
