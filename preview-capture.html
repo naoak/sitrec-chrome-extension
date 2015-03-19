@@ -202,7 +202,7 @@
         index = 0;
       }
       this.currentIndex = index;
-      this.timingIndex = recorder.fps * index;
+      this.timingIndex = Math.round((1000 / recorder.fps) * index);
       this.updateImage(index);
     },
     updateImage: function(index) {
