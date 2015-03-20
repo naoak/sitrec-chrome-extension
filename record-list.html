@@ -19,10 +19,20 @@
       background: #3fa370;
       color: white;
       text-transform: none;
-      float: right;
     }
     :host #harViewerBtn::shadow #ripple {
       color: blue;
+    }
+    :host #checkAllBtn {
+      margin: 20px 20px 0 30px;
+      background: #3fa370;
+      color: white;
+    }
+    :host #checkAllBtn::shadow #ripple {
+      color: blue;
+    }
+    :host #checkAllBtn core-icon {
+      margin-right: 5px;
     }
     :host ul {
       margin: 0;
@@ -40,12 +50,12 @@
     <core-ajax id="deleteAjax" url="{{server}}/api/record/delete" method="POST" contentType="application/json" handleAs="json"></core-ajax>
     <core-toolbar>
       <div><span id="title">Record List</span></div>
-      <core-icon-button id="checkAllBtn" icon="done-all" on-tap="{{toggleCheckAll}}"></core-icon-button>
       <core-icon-button id="downloadBtn" icon="file-download" on-tap="{{downloadRecords}}" hidden></core-icon-button>
       <core-icon-button id="deleteBtn" icon="delete" on-tap="{{showDeleteDialog}}" hidden></core-icon-button>
       <div flex></div>
       <paper-button id="harViewerBtn" on-tap="{{openHarViewer}}" layout end>Open HAR Viewer</paper-button>
     </core-toolbar>
+    <paper-button id="checkAllBtn" on-tap="{{toggleCheckAll}}">check all</paper-button>
     <ul id="list" horizontal layout wrap>
     <template repeat='{{records}}'>
       <li>
@@ -76,7 +86,7 @@
       ready: function() {
         var self = this;
         this.addEventListener('record-item-checkChanged', function() {
-          self.updateToolBar();
+          self.updateButtons();
         });
         this.$.detailListAjax.addEventListener('core-response', function(e) {
           var records = this.response.items;
@@ -138,16 +148,18 @@
             item.checked = toggle;
           });
         }
-        this.updateToolBar();
+        this.updateButtons();
       },
-      updateToolBar: function() {
+      updateButtons: function() {
         var items = Array.prototype.slice.call(this.$.list.querySelectorAll('record-item'));
+        var total = items.length;
         var checked = items.filter(function(item) {
           return item.checked;
         }).length;
         var hiddenFlag = (checked == 0);
         this.$.downloadBtn.hidden = hiddenFlag;
         this.$.deleteBtn.hidden = hiddenFlag;
+        this.$.checkAllBtn.textContent = (total == checked) ? 'uncheck all' : 'check all';
       },
       openHarViewer: function() {
         var url = this.server + '/viewer/';
