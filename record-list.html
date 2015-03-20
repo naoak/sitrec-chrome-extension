@@ -1,6 +1,8 @@
 <link rel="import" href="bower_components/polymer/polymer.html">
 <link rel="import" href="bower_components/core-ajax/core-ajax.html">
 <link rel="import" href="bower_components/paper-shadow/paper-shadow.html">
+<link rel="import" href="bower_components/paper-dialog/paper-action-dialog.html">
+<link rel="import" href="bower_components/paper-button/paper-button.html">
 <link rel="import" href="record-item.html">
 
 <polymer-element name="record-list" attributes="server">
@@ -8,6 +10,10 @@
     <style>
     :host {
       display: block;
+    }
+    :host #title {
+      font-size: 18px;
+      font-weight: bold;
     }
     :host ul {
       margin: 0;
@@ -24,8 +30,10 @@
     <core-ajax id="downloadAjax" url="{{server}}/api/record/download" method="POST" contentType="application/json" handleAs="json"></core-ajax>
     <core-ajax id="deleteAjax" url="{{server}}/api/record/delete" method="POST" contentType="application/json" handleAs="json"></core-ajax>
     <core-toolbar>
-      <core-icon-button icon="file-download" on-tap="{{downloadRecords}}"></core-icon-button>
-      <core-icon-button icon="delete" on-tap="{{deleteRecords}}"></core-icon-button>
+      <div><span id="title">Record List</span></div>
+      <core-icon-button id="checkAllBtn" icon="done-all" on-tap="{{toggleCheckAll}}"></core-icon-button>
+      <core-icon-button id="downloadBtn" icon="file-download" on-tap="{{downloadRecords}}" hidden></core-icon-button>
+      <core-icon-button id="deleteBtn" icon="delete" on-tap="{{showDeleteDialog}}" hidden></core-icon-button>
     </core-toolbar>
     <ul id="list" horizontal layout wrap>
     <template repeat='{{records}}'>
@@ -34,6 +42,11 @@
       </li>
     </template>
     </ul>
+    <paper-action-dialog id="deleteDialog" heading="Delete" transition="core-transition-center">
+      <p>Checked record items will be deleted.</p>
+      <paper-button affirmative>Cancel</paper-button>
+      <paper-button affirmative on-tap="{{deleteRecords}}">Delete</paper-button>
+    </paper-action-dialog>
     <iframe id="downloadLayer" style="display: none;"></iframe>
   </template>
   <script>
@@ -51,6 +64,9 @@
       },
       ready: function() {
         var self = this;
+        this.addEventListener('record-item-checkChanged', function() {
+          self.updateToolBar();
+        });
         this.$.detailListAjax.addEventListener('core-response', function(e) {
           var records = this.response.items;
           self.records = records.map(function(r) {
@@ -79,6 +95,9 @@
           downloadAjax.go();
         }
       },
+      showDeleteDialog: function() {
+        this.$.deleteDialog.toggle();
+      },
       deleteRecords: function() {
         var deleteAjax = this.$.deleteAjax;
         var deleteList = this.makeCheckedList();
@@ -86,6 +105,7 @@
           deleteAjax.body = JSON.stringify({records: deleteList});
           deleteAjax.go();
         }
+        this.$.deleteDialog.toggle();
       },
       makeCheckedList: function() {
         var items = Array.prototype.slice.call(this.$.list.querySelectorAll('record-item'));
@@ -94,6 +114,29 @@
         }).map(function(item) {
           return item.fullName;
         });
+      },
+      toggleCheckAll: function() {
+        var items = Array.prototype.slice.call(this.$.list.querySelectorAll('record-item'));
+        var total = items.length;
+        var checked = items.filter(function(item) {
+          return item.checked;
+        }).length;
+        if (total > 0) {
+          var toggle = (total != checked);
+          items.forEach(function(item) {
+            item.checked = toggle;
+          });
+        }
+        this.updateToolBar();
+      },
+      updateToolBar: function() {
+        var items = Array.prototype.slice.call(this.$.list.querySelectorAll('record-item'));
+        var checked = items.filter(function(item) {
+          return item.checked;
+        }).length;
+        var hiddenFlag = (checked == 0);
+        this.$.downloadBtn.hidden = hiddenFlag;
+        this.$.deleteBtn.hidden = hiddenFlag;
       }
     });
   })();

@@ -100,6 +100,9 @@
     },
     updateCheck: function(e) {
       this.checked = e.currentTarget.checked;
+      this.job('record-item-checker', function() {
+        this.fire('record-item-checkChanged');
+      }, 10);
     },
     toDetail: function() {
       var self = this;
