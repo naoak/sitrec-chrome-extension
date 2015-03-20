@@ -155,6 +155,7 @@ Recorder.prototype.takeScreenCapture = function(index, callback) {
     self.images.push({
       index: index,
       time: Date.now() - self.startDate,
+      ms: Math.round((1000 / self.fps) * index),
       data: img
     });
     if (callback) {
@@ -218,7 +219,7 @@ Recorder.prototype.makeFullRecordName = function() {
     recordName += '-' + throttle.rate + throttle.delay;
   }
   recordName += '-' + formatDate(new Date(this.startDate));
-  this.fullRecordName = recordName;
+  this.fullRecordName = this.options.fullRecordName = recordName;
 };
 
 function IntervalTimer(proc, span) {

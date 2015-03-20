@@ -27,7 +27,7 @@
       margin: auto;
       background: #888;
     }
-    :host #timingIndex {
+    :host #currentMS {
       display: block;
       margin-bottom: -15px;
       padding: 5px 10px;
@@ -35,7 +35,7 @@
       font-size: 14px;
       background: #e0e0e0;
     }
-    :host #timingIndex:after {
+    :host #currentMS:after {
       content: ' ms';
     }
     :host #controller {
@@ -76,7 +76,7 @@
         <img id="image" src="{{image}}" />
       </div>
       <div>
-        <span id="timingIndex">{{timingIndex}}</span>
+        <span id="currentMS">{{currentMS}}</span>
       </div>
       <div id="controller" layout vertical center>
         <template if="{{recording}}">
@@ -101,6 +101,8 @@
   Polymer({
     created: function() {
       this.image = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+      this.images = [];
+      this.options = {};
       this.playpauseIcon = 'av:play-arrow';
       this.currentIndex = 0;
       this.sliderMax = 0;
@@ -111,34 +113,39 @@
       var background;
       background = chrome.extension.getBackgroundPage();
       this.background = background;
-      chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-        if (request.capture) {
-          var index = request.capture.index;
-          self.updateImage(index);
-        }
-        else if (request.recordState) {
-          var recording = request.recordState.recording;
-          self.recording = recording;
-          if (!recording) {
-            self.initSlider();
-            if (background.recorder.harLog) {
-              self.uploadAll();
+      if (this.previewonly && this.fullRecordName) {
+        // Get HAR
+        // this.images = ...
+        // tihs.options = ...
+        // self.initSlider();
+      }
+      else {
+        chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+          if (request.capture) {
+            var index = request.capture.index;
+            self.images = background.recorder.images;
+            self.updateImage(index);
+          }
+          else if (request.recordState) {
+            var recording = request.recordState.recording;
+            self.recording = recording;
+            if (!recording) {
+              self.options = background.recorder.options;
+              self.initSlider();
+              if (background.recorder.harLog) {
+                self.uploadAll();
+              }
             }
           }
-        }
-      });
-      if (background.recorder.images && background.recorder.images.length > 0) {
-        self.initSlider();
+        });
       }
     },
     initSlider: function() {
       var self = this;
       var background = this.background;
-      var recorder = background.recorder;
-      self.throttle = recorder.options.throttle;
       self.currentIndex = 0;
-      self.timingIndex = 0;
-      self.sliderMax = recorder.images.length - 1;
+      self.currentMS = 0;
+      self.sliderMax = this.images.length - 1;
       self.playing = false;
       self.uploading = false;
     },
@@ -158,16 +165,16 @@
     },
     play: function() {
       var self = this;
-      var recorder = self.background.recorder;
-      var interval = 1000 / recorder.fps;
+      var fps = parseInt(this.options.fps, 10);
+      var interval = 1000 / fps;
       this.playing = true;
       this.playpauseIcon = 'av:pause';
-      if (this.currentIndex == recorder.images.length - 1) {
+      if (this.currentIndex == this.images.length - 1) {
         this.setIndex(0);
       }
       this.async(function nextStep() {
         if (self.playing) {
-          if (self.currentIndex < recorder.images.length - 1) {
+          if (self.currentIndex < self.images.length - 1) {
             self.setIndex(self.currentIndex + 1);
             self.async(nextStep, null, interval);
           }
@@ -194,49 +201,52 @@
       this.setIndex(this.currentIndex - 1);
     },
     setIndex: function(index) {
-      var recorder = this.background.recorder;
-      if (index >= recorder.images.length) {
-        index = recorder.images.length - 1;
+      var fps = parseInt(this.options.fps, 10);
+      if (index >= this.images.length) {
+        index = this.images.length - 1;
       }
       if (index < 0) {
         index = 0;
       }
       this.currentIndex = index;
-      this.timingIndex = Math.round((1000 / recorder.fps) * index);
+      this.currentMS = this.images[index].ms;
       this.updateImage(index);
     },
     updateImage: function(index) {
-      var images = this.background.recorder.images;
-      var image = images[index];
-      this.$.image.src = image.data;
+      var image = this.images[index];
+      var server = this.server || this.options.server;
+      this.$.image.src = image.data || (server + image.path);
     },
     uploadAll: function() {
       var self = this;
-      var recorder = self.background.recorder;
-      self.uploading = true;
-      getOrCreateRecord(recorder.server, recorder.fullRecordName, function(record) {
-        self.uploadNext(record, 0);
-      });
+      var server = this.server || this.options.server;
+      if (!this.previewonly) {
+        self.uploading = true;
+        getOrCreateRecord(server, this.options.fullRecordName, function(record) {
+          self.uploadNext(record, 0);
+        });
+      }
     },
     uploadNext: function(record, i) {
       var self = this;
       var recorder = this.background.recorder;
+      var server = this.server || this.options.server;
       var image;
       var photoName;
       var dataUri;
-      if (i < recorder.images.length) {
+      if (i < this.images.length) {
         this.setIndex(i);
-        image = recorder.images[i];
-        photoName = '' + (image.index * (1000 / recorder.fps));
+        image = this.images[i];
+        photoName = '' + image.ms;
         dataUri = image.data;
-        uploadPhoto(recorder.server, record.name, photoName, dataUri, function(data) {
+        uploadPhoto(server, record.name, photoName, dataUri, function(data) {
           self.uploadNext(record, i + 1);
         }, function(loaded, total) {
         });
       }
       else {
         if (recorder.harLog) {
-          uploadHar(recorder.server, record.name, recorder.harLog, function() {
+          uploadHar(server, record.name, recorder.harLog, function() {
             recorder.alert('All images and a HAR file have been uploaded');
             self.uploading = false;
           });
