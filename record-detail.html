@@ -19,7 +19,18 @@
       margin: 0 5px;
     }
     :host #date {
-      margin: 0 5px;
+      margin: 20px;
+    }
+    :host #timing {
+      margin: 20px;
+      font-size: 14px;
+      border-collapse: collapse;
+    }
+    :host #timing .ms {
+      text-align: right;
+    }
+    :host #timing tr:first-child {
+      border-bottom: solid 1px black;
     }
     :host ul {
       width: 950px;
@@ -43,8 +54,9 @@
     <core-ajax id="ajax" url="{{server}}/api/record/detail/{{fullName}}" handleAs="json"></core-ajax>
     <core-toolbar>
       <core-icon-button icon="arrow-back" on-tap={{back}}"></core-icon-button>
-      <div flex><span id="title">{{name}}</span> <span id="throttle">{{throttle.rate}} {{throttle.delay}}</span> <span id="url">{{url}}</span> <span id="date">{{date}}</span></div>
+      <div flex><span id="title">{{name}}</span> <span id="throttle">{{throttle.rate}} {{throttle.delay}}</span> <span id="url">{{url}}</span></div>
     </core-toolbar>
+    <h2 id="date">{{date}}</h2>
     <table id="timing">
       <tr>
         <th class="event">Event</th>
@@ -59,15 +71,6 @@
         <td class="ms">{{timing.load}}</td>
       </tr>
     </table>
-    {{server}}
-    {{name}}
-    {{url}}
-    {{throttle.rate}}
-    {{throttle.delay}}
-    {{timing.contentLoad}}
-    {{timing.load}}
-    {{date}}
-    {{fullName}}
     <ul horizontal layout wrap>
       <template repeat="{{images}}">
       <li>
