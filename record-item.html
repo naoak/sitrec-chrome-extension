@@ -64,12 +64,12 @@
       padding: 0 5px;
     }
     </style>
-    <paper-shadow z="1" id="item" vertical layout on-click="{{onClick}}">
+    <paper-shadow z="1" id="item" vertical layout on-click="{{toDetail}}">
       <header id="header">
         <div id="name">
           {{name}}
         </div>
-        <paper-checkbox id="check" on-click="{{onCheckClick}}" on-change="{{onCheckChange}}"></paper-checkbox>
+        <paper-checkbox id="check" checked?={{checked}} on-click="{{stopPropagation}}" on-change="{{updateCheck}}"></paper-checkbox>
       </header>
       <div id="center">
         <div id="url">
@@ -89,16 +89,19 @@
   </template>
   <script>
   Polymer({
-    created: function() {
+    publish: {
+      checked: {
+        value: false,
+        reflect: true
+      }
     },
-    ready: function() {
-    },
-    onCheckClick: function(e) {
+    stopPropagation: function(e) {
       e.stopPropagation();
     },
-    onCheckChange: function() {
+    updateCheck: function(e) {
+      this.checked = e.currentTarget.checked;
     },
-    onClick: function() {
+    toDetail: function() {
       var self = this;
       this.fire('toDetail', {
         name: self.name,
