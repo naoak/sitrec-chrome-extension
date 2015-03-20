@@ -15,6 +15,15 @@
       font-size: 18px;
       font-weight: bold;
     }
+    :host #harViewerBtn {
+      background: #3fa370;
+      color: white;
+      text-transform: none;
+      float: right;
+    }
+    :host #harViewerBtn::shadow #ripple {
+      color: blue;
+    }
     :host ul {
       margin: 0;
       padding: 25px;
@@ -34,6 +43,8 @@
       <core-icon-button id="checkAllBtn" icon="done-all" on-tap="{{toggleCheckAll}}"></core-icon-button>
       <core-icon-button id="downloadBtn" icon="file-download" on-tap="{{downloadRecords}}" hidden></core-icon-button>
       <core-icon-button id="deleteBtn" icon="delete" on-tap="{{showDeleteDialog}}" hidden></core-icon-button>
+      <div flex></div>
+      <paper-button id="harViewerBtn" on-tap="{{openHarViewer}}" layout end>Open HAR Viewer</paper-button>
     </core-toolbar>
     <ul id="list" horizontal layout wrap>
     <template repeat='{{records}}'>
@@ -137,6 +148,10 @@
         var hiddenFlag = (checked == 0);
         this.$.downloadBtn.hidden = hiddenFlag;
         this.$.deleteBtn.hidden = hiddenFlag;
+      },
+      openHarViewer: function() {
+        var url = this.server + '/viewer/';
+        window.open(url);
       }
     });
   })();
