@@ -1,5 +1,6 @@
 <link rel="import" href="bower_components/polymer/polymer.html">
 <link rel="import" href="bower_components/core-ajax/core-ajax.html">
+<link rel="import" href="bower_components/core-tooltip/core-tooltip.html">
 <link rel="import" href="bower_components/paper-shadow/paper-shadow.html">
 <link rel="import" href="bower_components/paper-dialog/paper-action-dialog.html">
 <link rel="import" href="bower_components/paper-button/paper-button.html">
@@ -50,8 +51,12 @@
     <core-ajax id="deleteAjax" url="{{server}}/api/record/delete" method="POST" contentType="application/json" handleAs="json"></core-ajax>
     <core-toolbar>
       <div><span id="title">Record List</span></div>
-      <core-icon-button id="downloadBtn" icon="file-download" on-tap="{{downloadRecords}}" hidden></core-icon-button>
-      <core-icon-button id="deleteBtn" icon="delete" on-tap="{{showDeleteDialog}}" hidden></core-icon-button>
+      <core-tooltip label="Download">
+        <core-icon-button id="downloadBtn" icon="file-download" on-tap="{{downloadRecords}}" hidden></core-icon-button>
+      </core-tooltip>
+      <core-tooltip label="Delete">
+        <core-icon-button id="deleteBtn" icon="delete" on-tap="{{showDeleteDialog}}" hidden></core-icon-button>
+      </core-tooltip>
       <div flex></div>
       <paper-button id="harViewerBtn" on-tap="{{openHarViewer}}" layout end>Open HAR Viewer</paper-button>
     </core-toolbar>
