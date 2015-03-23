@@ -32,15 +32,16 @@
     </style>
     <core-header-panel>
       <core-toolbar>
-        <paper-tabs id="tabs" selected="view" self-end>
-          <paper-tab name="view">View</paper-tab>
+        <paper-tabs id="tabs" selected="record" self-end>
           <paper-tab name="record">Record</paper-tab>
+          <paper-tab name="view">View</paper-tab>
         </paper-tabs>
       </core-toolbar>
       <core-pages id="pages" selected="0">
-        <view-page id="viewPage"></view-page>
         <record-page id="recordPage"></record-page>
+        <view-page id="viewPage"></view-page>
       </core-pages>
+      <paper-toast id="toast" text=""></paper-toast>
     </core-header-panel>
   </template>
   <script>
@@ -50,10 +51,17 @@
         var tabs = this.$.tabs;
         var pages = this.$.pages;
         this.$.tabs.addEventListener('core-select', function() {
-          pages.selected = (tabs.selected == 'view') ? 0 : 1;
+          pages.selected = (tabs.selected == 'record') ? 0 : 1;
         });
         this.addEventListener('preview-capture-uploaded', function() {
           self.$.viewPage.updateList();
+        });
+        chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+          if (request.alert) {
+            var message = request.alert.message;
+            self.$.toast.text = message;
+            self.$.toast.show();
+          }
         });
       }
     });

@@ -20,19 +20,10 @@
       <record-list id="list" server="{{server}}"></record-list>
       <record-detail id="detail" server="{{server}}"></record-detail>
     </core-animated-pages>
-    <paper-toast id="toast" text=""></paper-toast>
   </template>
   <script>
   Polymer({
     ready: function() {
-      var self = this;
-      chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-        if (request.alert) {
-          var message = request.alert.message;
-          self.$.toast.text= message;
-          self.$.toast.show();
-        }
-      });
       this.addEventListener('toList', this.toList);
       this.addEventListener('toDetail', this.toDetail);
     },
