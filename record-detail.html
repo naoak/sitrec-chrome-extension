@@ -61,8 +61,8 @@
     <core-ajax id="ajax" url="{{server}}/api/record/detail/{{fullName}}" handleAs="json"></core-ajax>
     <core-toolbar>
       <core-icon-button icon="arrow-back" on-tap={{back}}"></core-icon-button>
-      <div flex><span id="title">{{name}}</span> <span id="throttle">{{throttle.rate}} {{throttle.delay}}</span> <span id="url">{{url}}</span></div>
-      <paper-button id="ssViewerBtn" on-tap="{{openSSViewer}}" layout end>View Screenshots</paper-button>
+      <div flex><span id="title">{{name}}</span> <span id="url">{{url}}</span> <span id="throttle">{{throttle.rate}} {{throttle.delay}}</span></div>
+      <paper-button id="ssViewerBtn" on-tap="{{openSSViewer}}" layout end>SS</paper-button>
     </core-toolbar>
     <core-media-query query="max-width: 720px" queryMatches="{{phoneScreen}}"></core-media-query>
     <div layout vertical?={{phoneScreen}} horizontal?={{!phoneScreen}}>
