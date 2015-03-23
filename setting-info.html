@@ -185,6 +185,9 @@
       var self = this;
       this.job('server', function() {
         connectivity.check(server.value);
+        self.fire('setting-info-serverChanged', {
+          server: self.options.server
+        });
       }, self.debounceDelay);
     },
     'options.httpProxyChanged': function() {

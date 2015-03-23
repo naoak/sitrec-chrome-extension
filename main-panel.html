@@ -56,6 +56,10 @@
         this.addEventListener('preview-capture-uploaded', function() {
           self.$.viewPage.updateList();
         });
+        this.addEventListener('setting-info-serverChanged', function(e) {
+          self.$.viewPage.server = e.detail.server;
+          self.$.viewPage.updateList();
+        });
         chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
           if (request.alert) {
             var message = request.alert.message;
