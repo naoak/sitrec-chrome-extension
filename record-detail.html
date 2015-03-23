@@ -1,5 +1,6 @@
 <link rel="import" href="bower_components/polymer/polymer.html">
 <link rel="import" href="bower_components/core-ajax/core-ajax.html">
+<link rel="import" href="preview-capture.html">
 
 <polymer-element name="record-detail" attributes="server name url throttle timing date fullName">
   <template>
@@ -71,17 +72,12 @@
         <td class="ms">{{timing.load}}</td>
       </tr>
     </table>
-    <ul horizontal layout wrap>
-      <template repeat="{{images}}">
-      <li>
-        <img class="thumbnail" src="{{url}}">
-      </li>
-      </template>
-    </ul>
+    <preview-capture previewonly fullRecordName="{{fullName}}" images="{{images}}" har="{{har}}"></preview-capture>
   </template>
   <script>
   Polymer({
     created: function() {
+      self.images = [];
     },
     ready: function() {
       var self = this;
@@ -92,6 +88,7 @@
             url: self.server + image.path
           };
         });
+        self.har = this.response.har;
       });
     },
     fullNameChanged: function() {
