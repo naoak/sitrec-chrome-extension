@@ -64,7 +64,6 @@ function uploadPhoto(server, recordName, photoName, dataURI, callback, progressC
   };
   if (progressCallback) {
     xhr.upload.onprogress = function(e) {
-      console.log('progress', e.lengthComputable, e.loaded, e.total);
       if (e.lengthComputable) {
         progressCallback(e.loaded, e.total);
       }
