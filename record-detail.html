@@ -20,13 +20,26 @@
     :host #url {
       margin: 0 5px;
     }
+    :host #ssViewerBtn {
+      background: #3fa370;
+      color: white;
+      text-transform: none;
+    }
+    :host #ssViewerBtn::shadow #ripple {
+      color: blue;
+    }
     :host #info {
       width: 200px;
       margin: 25px 25px -5px 25px;
       padding: 5px;
       background-color: white;
+      border: solid 2px #a0dabd;
     }
     :host #date {
+      width: 200px;
+      margin: 25px 25px 25px 25px;
+      padding: 5px;
+      background-color: white;
       font-size: 16px;
       font-weight: normal;
     }
@@ -49,12 +62,15 @@
     <core-toolbar>
       <core-icon-button icon="arrow-back" on-tap={{back}}"></core-icon-button>
       <div flex><span id="title">{{name}}</span> <span id="throttle">{{throttle.rate}} {{throttle.delay}}</span> <span id="url">{{url}}</span></div>
-      <div><span id="date">{{date}}</span></div>
+      <paper-button id="ssViewerBtn" on-tap="{{openSSViewer}}" layout end>View Screenshots</paper-button>
     </core-toolbar>
     <core-media-query query="max-width: 720px" queryMatches="{{phoneScreen}}"></core-media-query>
     <div layout vertical?={{phoneScreen}} horizontal?={{!phoneScreen}}>
       <preview-capture flex previewonly fullRecordName="{{fullName}}" images="{{images}}" har="{{har}}"></preview-capture>
       <div>
+        <paper-shadow id="date" z="1">
+          {{date}}
+        </paper-shadow>
         <paper-shadow id="info" z="1">
           <table id="timing">
             <tr>
@@ -95,6 +111,10 @@
     },
     back: function() {
       this.fire('toList', {});
+    },
+    openSSViewer: function() {
+      var url = this.server + '/record/' + this.fullName;
+      window.open(url);
     }
   });
   </script>
