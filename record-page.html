@@ -10,11 +10,17 @@
       display: block;
       width: 100%;
     }
+    :host #setting {
+      margin: 25px;
+    }
+    :host #preview {
+      margin: 25px;
+    }
     </style>
     <core-media-query query="max-width: 920px" queryMatches="{{phoneScreen}}"></core-media-query>
-    <div layout vertical?={{phoneScreen}} horizontal?={{!phoneScreen}} center?={{phoneScreen}}>
-      <setting-info style="width: 460px;"></setting-info>
-      <preview-capture flex></preview-capture>
+    <div id="layout" layout vertical?={{phoneScreen}} horizontal?={{!phoneScreen}} center?={{phoneScreen}}>
+      <setting-info id="setting" phoneScreen?={{phoneScreen}}></setting-info>
+      <preview-capture id="preview" flex collapse?={{phoneScreen}}></preview-capture>
     </div>
     <paper-toast id="toast" text=""></paper-toast>
   </template>

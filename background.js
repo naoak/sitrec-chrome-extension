@@ -34,13 +34,17 @@ function Recorder() {
 
   function connectWithPopupWindow() {
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+      var recording;
       if (request.toggleRecord) {
         if (self.state.isRecording()) {
+          recording = false;
           self.stop();
         }
         else {
+          recording = true;
           self.start(request.toggleRecord);
         }
+        sendResponse({recording: recording});
       }
     });
   }

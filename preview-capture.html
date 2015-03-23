@@ -4,12 +4,11 @@
 <link rel="import" href="bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="bower_components/paper-slider/paper-slider.html">
 
-<polymer-element name="preview-capture" attributes="previewonly images har">
+<polymer-element name="preview-capture" attributes="previewonly images har collapse">
   <template>
     <style>
     :host {
       display: block;
-      padding: 25px;
       box-sizing: border-box;
     }
     :host #preview {
@@ -72,7 +71,7 @@
     </style>
 
     <paper-shadow id="preview" z="1">
-      <div id="display">
+      <div id="display" hidden?={{collapse}}>
         <img id="image" src="{{image}}" />
       </div>
       <div>
@@ -100,6 +99,7 @@
   <script>
   Polymer({
     created: function() {
+      this.previewonly = false;
       this.image = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
       this.images = [];
       this.har = {};
@@ -108,6 +108,7 @@
       this.currentIndex = 0;
       this.sliderMax = 0;
       this.playing = false;
+      this.collapse = false;
     },
     ready: function() {
       var self = this;
@@ -259,6 +260,7 @@
         if (recorder.harLog) {
           uploadHar(server, record.name, recorder.harLog, function() {
             recorder.alert('All images and a HAR file have been uploaded');
+            self.fire('preview-capture-uploaded');
             self.uploading = false;
           });
         }

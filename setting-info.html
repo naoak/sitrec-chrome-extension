@@ -11,21 +11,45 @@
 <link rel="import" href="bower_components/paper-button/paper-button.html">
 <link rel="import" href="connectivity-check.html">
 
-<polymer-element name="setting-info">
+<polymer-element name="setting-info" attributes="phoneScreen">
   <template>
     <style>
     :host {
       display: block;
-      padding: 25px;
+      width: 410px;
       box-sizing: border-box;
     }
+    :host #header {
+      position: relative;
+      width: 100%;
+      height: 25px;
+      background-color: white;
+      border-bottom: solid 1px #3fa370;
+      overflow: hidden;
+    }
+    :host #title {
+      margin: 0;
+      padding: 4px 5px;
+      font-size: 14px;
+      font-weight: normal;
+    }
     :host form {
+      width: 100%;
       background-color: white;
     }
     :host form fieldset {
       margin: 20px;
       padding: 0;
       border: none;
+    }
+    :host form #basic-fields {
+      height: 135px;
+    }
+    :host form #server-fields {
+      height: 90px;
+    }
+    :host form #recorder-fields {
+      height: 142px;
     }
     :host form core-label {
       width: 100px;
@@ -66,61 +90,64 @@
     <chrome-storage name="fps" value="{{options.fps}}"></chrome-storage>
 
     <paper-shadow z="1">
-      <form layout vertical left>
-        <fieldset class="basic-fields">
-          <div layout horizontal center>
-            <core-label>Record Name</core-label>
-            <paper-input label="Record Name" flex value="{{options.recordName}}"></paper-input>
-          </div>
-          <div layout horizontal center>
-            <core-label>Initial URL</core-label>
-            <paper-input label="Initial URL" flex value="{{options.initialUrl}}"></paper-input>
-          </div>
-          <div layout horizontal center>
-            <core-label>URL</core-label>
-            <paper-input label="URL" flex value="{{options.url}}"></paper-input>
-          </div>
-        </fieldset>
-        <fieldset class="server-fields">
-          <div layout horizontal center>
-            <core-label>Server</core-label>
-            <paper-input id="server" label="Server" flex value="{{options.server}}"></paper-input>
-            <connectivity-check id="serverConnectivity"></connectivity-check>
-          </div>
-          <div layout horizontal center>
-            <core-label>HTTP Proxy</core-label>
-            <paper-input id="httpProxy" label="HTTP Proxy" flex value="{{options.httpProxy}}"></paper-input>
-            <connectivity-check id="httpProxyConnectivity"></connectivity-check>
-          </div>
-        </fieldset>
-        <fieldset class="recorder-option-fields">
-          <div layout horizontal center>
-            <core-label>Throttle</core-label>
-            <paper-dropdown-menu label="Throttle" flex>
-              <paper-dropdown class="dropdown">
-                <core-menu class="menu" selected="{{options.throttle}}" valueattr="value">
-                  <paper-item value="unlimited">No Restriction</paper-item>
-                  <paper-item value="20mbit:50ms">20Mbps 50ms</paper-item>
-                  <paper-item value="20mbit:200ms">20Mbps 200ms</paper-item>
-                  <paper-item value="2mbit:50ms">2Mbps 50ms</paper-item>
-                  <paper-item value="2mbit:200ms">2Mbps 200ms</paper-item>
-                </core-menu>
-              </paper-dropdown>
-            </paper-dropdown-menu>
-          </div>
-          <div layout horizontal center>
-            <core-label>Loss Time</core-label>
-            <paper-input label="Loss Time" value="{{options.losstime}}" style="width: 6em;"></paper-input>
-            <span class="unit">ms</span>
-          </div>
-          <div layout horizontal center>
-            <core-label>FPS</core-label>
-            <paper-input label="FPS" value="{{options.fps}}" style="width: 3em;"></paper-input>
-            <span class="unit">f/s</span>
-          </div>
-        </fieldset>
-        <paper-button id="rec-btn" raised on-click="{{onRecClick}}">{{recBtnLabel}}</paper-button>
-      </form>
+      <header id="header" horizontal layout>
+        <h2 flex id="title">SETTING</h2>
+      </header>
+        <form layout vertical left>
+          <fieldset id="basic-fields">
+            <div layout horizontal center>
+              <core-label>Record Name</core-label>
+              <paper-input label="Record Name" flex value="{{options.recordName}}"></paper-input>
+            </div>
+            <div layout horizontal center>
+              <core-label>Initial URL</core-label>
+              <paper-input label="Initial URL" flex value="{{options.initialUrl}}"></paper-input>
+            </div>
+            <div layout horizontal center>
+              <core-label>URL</core-label>
+              <paper-input label="URL" flex value="{{options.url}}"></paper-input>
+            </div>
+          </fieldset>
+          <fieldset id="server-fields">
+            <div layout horizontal center>
+              <core-label>Server</core-label>
+              <paper-input id="server" label="Server" flex value="{{options.server}}"></paper-input>
+              <connectivity-check id="serverConnectivity"></connectivity-check>
+            </div>
+            <div layout horizontal center>
+              <core-label>HTTP Proxy</core-label>
+              <paper-input id="httpProxy" label="HTTP Proxy" flex value="{{options.httpProxy}}"></paper-input>
+              <connectivity-check id="httpProxyConnectivity"></connectivity-check>
+            </div>
+          </fieldset>
+          <fieldset id="recorder-fields">
+            <div layout horizontal center>
+              <core-label>Throttle</core-label>
+              <paper-dropdown-menu label="Throttle" flex>
+                <paper-dropdown class="dropdown">
+                  <core-menu class="menu" selected="{{options.throttle}}" valueattr="value">
+                    <paper-item value="unlimited">No Restriction</paper-item>
+                    <paper-item value="20mbit:50ms">20Mbps 50ms</paper-item>
+                    <paper-item value="20mbit:200ms">20Mbps 200ms</paper-item>
+                    <paper-item value="2mbit:50ms">2Mbps 50ms</paper-item>
+                    <paper-item value="2mbit:200ms">2Mbps 200ms</paper-item>
+                  </core-menu>
+                </paper-dropdown>
+              </paper-dropdown-menu>
+            </div>
+            <div layout horizontal center>
+              <core-label>Loss Time</core-label>
+              <paper-input label="Loss Time" value="{{options.losstime}}" style="width: 6em;"></paper-input>
+              <span class="unit">ms</span>
+            </div>
+            <div layout horizontal center>
+              <core-label>FPS</core-label>
+              <paper-input label="FPS" value="{{options.fps}}" style="width: 3em;"></paper-input>
+              <span class="unit">f/s</span>
+            </div>
+          </fieldset>
+          <paper-button id="rec-btn" raised on-tap="{{onRecClick}}">{{recBtnLabel}}</paper-button>
+        </form>
     </paper-shadow>
 
   </template>
@@ -138,6 +165,8 @@
         fps: 10
       };
       this.recBtnLabel = 'rec';
+      this.collapse = false;
+      this.handleIcon = 'expand-more';
     },
     ready: function() {
       var self = this;
@@ -166,7 +195,7 @@
         connectivity.check('http://' + httpProxy.value);
       }, self.debounceDelay);
     },
-    onRecClick: function() {
+    onRecClick: function(e) {
       function clone(obj) {
         var temp;
         if (obj == null || typeof(obj) != 'object') {
@@ -180,6 +209,7 @@
         }
         return temp;
       }
+      e.stopPropagation();
       var self = this;
       var options = clone(this.options);
       if (options.throttle && options.throttle != 'unlimited') {
@@ -192,7 +222,7 @@
       else {
         options.throttle = null;
       }
-      chrome.runtime.sendMessage({toggleRecord: options});
+      chrome.runtime.sendMessage({toggleRecord: options}, function(response) {});
     }
   });
   </script>

@@ -48,6 +48,9 @@
       detail.date = e.detail.date;
       detail.fullName = e.detail.fullName;
       this.$.pages.selected = 1;
+    },
+    updateList: function() {
+      this.$.list.loadDetailList();
     }
   });
   </script>

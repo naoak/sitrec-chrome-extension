@@ -38,18 +38,22 @@
         </paper-tabs>
       </core-toolbar>
       <core-pages id="pages" selected="0">
-        <view-page></view-page>
-        <record-page></record-page>
+        <view-page id="viewPage"></view-page>
+        <record-page id="recordPage"></record-page>
       </core-pages>
     </core-header-panel>
   </template>
   <script>
     Polymer({
       ready: function() {
+        var self = this;
         var tabs = this.$.tabs;
         var pages = this.$.pages;
         this.$.tabs.addEventListener('core-select', function() {
           pages.selected = (tabs.selected == 'view') ? 0 : 1;
+        });
+        this.addEventListener('preview-capture-uploaded', function() {
+          self.$.viewPage.updateList();
         });
       }
     });
